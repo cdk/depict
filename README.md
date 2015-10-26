@@ -22,7 +22,7 @@ $ target/cdkdepict-0.1.jar
 You can download prebuilt releases from GitHub:
  
  * [`cdkdepict-0.1.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.1.war)
- * [`cdkdepict-0.1.jar`](https://github.com/cdk/depict/releases/download/untagged-a976f714c583a5f7e543/cdkdepict-0.1.jar)
+ * [`cdkdepict-0.1.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.1.jar)
 
 #### Embedded App
 
