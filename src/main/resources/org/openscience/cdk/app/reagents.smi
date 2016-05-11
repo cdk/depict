@@ -1,0 +1,39 @@
+# Salts
+[Na+].[H-] NaH
+[Cl+].[H-] HCl
+[Br+].[H-] HBr
+[Na+].[Cl-] NaCl
+[Na]-Cl NaCl
+[Al](Cl)(Cl)(Cl) AlCl3
+[Al+3].[Cl-].[Cl-].[Cl-] AlCl3
+[Cs+].[Cs+].O=C([O-])[O-] Cs2CO3
+[K+].[K+].O=C([O-])[O-] K2CO3
+[Na+].[Na+].O=C([O-])[O-] Na2CO3
+[H-].[H-].[H-].[H-].[Li+].[Al+3] LAH
+[Na+].[OH-] NaOH
+[K+].[OH-] KOH
+[Li+].[OH-] LiOH
+[Na+].[BH4-] NaBH4
+
+# Common Agents
+O1CCCC1 THF
+ClCCl DCM
+O=CN(C)C DMF
+OC MeOH
+OCC EtOH
+N(CC)(CC)CC NEt3
+N(CC)(C(C)C)C(C)C DiPEA
+O=C(O)C(F)(F)F TFA
+O1CCOCC1 Dioxane
+C=1C=CC(=CC1)C Toluene
+O=C(O)C AcOH
+N#CC MeCN
+C=1C=CC(=CC1)[P](C=2C=CC=CC2)(C=3C=CC=CC3)[Pd]([P](C=4C=CC=CC4)(C=5C=CC=CC5)C=6C=CC=CC6)([P](C=7C=CC=CC7)(C=8C=CC=CC8)C=9C=CC=CC9)[P](C=%10C=CC=CC%10)(C=%11C=CC=CC%11)C=%12C=CC=CC%12 Pd(PPh3)4
+[Pd].C1=CC=C(C=C1)P(C1=CC=CC=C1)C1=CC=CC=C1.C1=CC=C(C=C1)P(C1=CC=CC=C1)C1=CC=CC=C1.C1=CC=C(C=C1)P(C1=CC=CC=C1)C1=CC=CC=C1.C1=CC=C(C=C1)P(C1=CC=CC=C1)C1=CC=CC=C1 Pd(PPh3)4
+C=1C=CC(=CC1)P(C=2C=CC=CC2)C=3C=CC=CC3 PPh3
+N=1C=CC(=CC1)N(C)C DMAP
+[Li]CCCC nBuLi
+F[P-](F)(F)(F)(F)F.N1=NN(OC(N(C)C)=[N+](C)C)C=2N=CC=CC12 HATU
+
+ON1N=NC=2C=CC=CC21 HOBt
+O=S(C)C DMSO

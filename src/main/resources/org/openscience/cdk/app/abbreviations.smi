@@ -1,0 +1,110 @@
+# abbreviations.smi
+#
+# Functional group abbreviations for automated contraction and expansion
+# of labels. Some entries appear twice, the first takes priority for
+# contraction.
+#
+#   - Substituents, one attachments
+#   - Linkers, two attachments (not currently used)
+#
+# This list extends that present github.com/openbabel/superatoms for which
+# the following license applies:
+#
+#    This is free and unencumbered software released into the public domain.
+#
+#    Anyone is free to copy, modify, publish, use, compile, sell, or
+#    distribute this software, either in source code form or as a compiled
+#    binary, for any purpose, commercial or non-commercial, and by any
+#    means.
+#
+#    In jurisdictions that recognize copyright laws, the author or authors
+#    of this software dedicate any and all copyright interest in the
+#    software to the public domain. We make this dedication for the benefit
+#    of the public at large and to the detriment of our heirs and
+#    successors. We intend this dedication to be an overt act of
+#    relinquishment in perpetuity of all present and future rights to this
+#    software under copyright law.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+#    IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+#    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#    OTHER DEALINGS IN THE SOFTWARE.
+#
+#    For more information, please refer to <http://unlicense.org/>
+
+# Substituents
+CC(C)(COP([O-])(=O)OP([O-])(=O)OC[C@H]1O[C@H]([C@H](O)[C@@H]1OP([O-])([O-])=O)N1C=NC2=C(N)N=CN=C12)[C@@H](O)C(=O)NCCC(=O)NCCS* CoA
+*C(=O)OCC1C2=CC=CC=C2C2=C1C=CC=C2 Fmoc
+CC(C)(C)OC(*)=O Boc
+*-N1C2=CC=CC=C2C2=C1C=CC=C2 Car
+*C(c1ccccc1)(c1ccccc1)c1ccccc1 CPh3
+*C(c1ccccc1)c1ccccc1 CHPh2
+*C(=O)OCC1=CC=CC=C1 Cbz
+*C(=O)c1ccccc1 Bz
+*Cc1ccccc1 Bn
+*c1ccccc1 Ph
+*C1CCCCC1 Cy
+*OP(=O)(O)O OPO3H2
+*OP(=O)([O-])[O-] OPO3-2
+*OP(=O)([OH])[O-] OPO3-
+*P(=O)(O)O PO3H2
+*P(=O)([O-])[O-] PO3-2
+*P(=O)([OH])[O-] PO3-
+*S(=O)(=O)[O-] SO3-
+*OS(=O)(=O)O OSO3H
+*O[S+]([O-])(=O)O OSO3H
+*S(=O)(=O)O SO3H
+*[S+]([O-])(=O)O SO3H
+*S(=O)(=O)C Ms
+*C(C)(C)(C) tBu
+*C(CC)(C) sBu
+*CC(C)(C) iBu
+*C(C)C iPr
+*NCCCCC NHAm
+*NCCCC NHPr
+*NCCC NHBu
+*NCC NHEt
+*CCCC nBu
+*OCC OEt
+*OC OMe
+*OC(=O)C OAc
+*C(=O)C Ac
+*C(=O)O COOH
+*C(=O)[O-] COO-
+*N(=O)=O NO2
+*[N+](=O)[O-] NO2
+*N=[N+]=[N-] N3
+*C#N CN
+*C(F)(F)F CF3
+*C(F)(F) CHF2
+*C=O CO
+
+# linear alkyls
+*CCCCCCCCCCCCCCCCCCCC n-Icosyl
+*CCCCCCCCCCCCCCCCCCC n-Nonadecyl
+*CCCCCCCCCCCCCCCCCC n-Octadecyl
+*CCCCCCCCCCCCCCCCC n-Heptadecyl
+*CCCCCCCCCCCCCCCC n-Hexadecyl
+*CCCCCCCCCCCCCCC n-Pentadecyl
+*CCCCCCCCCCCCCC n-Tetradecyl
+*CCCCCCCCCCCCC n-Tridecyl
+*CCCCCCCCCCCC n-Dodecyl
+*CCCCCCCCCCC n-Undecyl
+*CCCCCCCCCC n-Decyl
+*CCCCCCCCC n-Nonyl
+*CCCCCCCC n-Octyl
+*CCCCCCC n-Heptyl
+*CCCCCC nHex
+*CCCCC nPent
+*CCCC nBu
+*CCC Pr
+*CC Et
+# *C Me
+
+
+# Linkers
+*CCOCCOCCOCCO* PEG4
+*CCOCCOCCO* PEG3
