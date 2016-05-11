@@ -84,7 +84,7 @@ public class DepictController {
 
     public DepictController() throws IOException {
         int count = this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
-        this.reagents.loadFromFile("/org/openscience/cdk/app/agents.smi");
+        this.reagents.loadFromFile("/org/openscience/cdk/app/reagents.smi");
     }
 
     /**
