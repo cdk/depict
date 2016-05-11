@@ -11,52 +11,88 @@
     <table class="grid">
         <tr>
             <td rowspan="3"><img src="img/logo.svg" height="125px"/></td>
-            <td><b>Scalable Chemistry Depictions</b></td>
+            <td><b>SMILES Depictor</b></td>
         </tr>
         <tr>
-            <td><i>This page demonstrates depiction capabilities of the <a href="http://www.github.com/cdk/cdk">Chemistry Development Kit</a>, Enter SMILES in the box below</i></td>
+            <td>This page demonstrates depiction capabilities of the <a href="http://www.github.com/cdk/cdk">Chemistry
+                Development Kit</a>, Enter SMILES in the box below
+            </td>
         </tr>
         <tr>
-            <td>Version: ${project.version} Alpha</td>
+            <td>Version: ${project.version}</td>
         </tr>
     </table>
     <textarea id="input" class="textin" onkeyup="update()">CN1C=NC2=C1C(=O)N(C(=O)N2C)C caffeine
-[Al+3].[Cl-].[Cl-].[Cl-].[Cs+].[O-]C(=O)[O-].[Cs+] AlCl3.Cs2CO3
+[Cs+].[O-]C(=O)[O-].[Cs+]
 [Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].CCCCc1ccc(CO[C@H]2O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]2O[C@H]3O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]4O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]5O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]5OS(=O)(=O)[O-])[C@@H]4OS(=O)(=O)[O-])[C@@H]3OS(=O)(=O)[O-])cc1 CHEMBL590010
-CCO.CC(=O)O>[H+]>CC(=O)OCC.O
+CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterification [1.7.3]
+[CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][cH:13][cH:14][cH:15]1.[CH2:3]([CH2:4][C:5](=[O:6])Cl)[CH2:2][Cl:1]>[Al+3].[Cl-].[Cl-].[Cl-].C(Cl)Cl>[CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][c:13]([cH:14][cH:15]1)[C:5](=[O:6])[CH2:4][CH2:3][CH2:2][Cl:1] |f:2.3.4.5| Friedel-Crafts acylation [3.10.1]
 </textarea>
     <div id="options">
         <table class="grid" style="text-align: left;">
             <tr>
-                <th>Style:</th>
+                <th>Style</th>
                 <td>
                     <select name="style" onchange="update()">
                         <option value="cow">Color on White</option>
                         <option value="cob">Color on Black</option>
                         <option value="bow" selected>Black on White</option>
                         <option value="wob">White on Black</option>
+                        <option value="nob">Neon on Black</option>
                     </select>
                 </td>
-                <th>Zoom:</th>
+            </tr>
+            <tr>
+                <th>Abbreviate</th>
                 <td>
-                    <input onchange="update()" name="zoom" type="number" min="1" max="1000" step="5" value="130" size="4">%
+                    <select name="abbr" onchange="update()">
+                        <option value="on" selected>Reagents and Groups</option>
+                        <option value="reagents">Reagents</option>
+                        <option value="off">None</option>
+                    </select>
                 </td>
-                <th>Annotation:</th>
+            </tr>
+            <tr>
+                <th>Zoom</th>
+                <td>
+                    <input onchange="update()" name="zoom" type="range" min="10" max="500" step="5" value="130">
+                </td>
+            </tr>
+            <tr>
+                <th>Annotation</th>
                 <td>
                     <select name="annotate" onchange="update()">
                         <option value="none" selected>None</option>
                         <option value="number">Atom Numbers</option>
                         <option value="mapidx">Atom Mapping</option>
+                        <option value="colmap">Color Map</option>
                     </select>
                 </td>
             </tr>
+            <tr>
+                <th>Suppress Hydrogens</th>
+                <td>
+                    <input type="checkbox" name="suppressh" onchange="update()" checked>
+                </td>
+            </tr>
+            <tr>
+                <th>Show Title</th>
+                <td>
+                    <input type="checkbox" name="showtitle" onchange="update()">
+                </td>
+            </tr>
+            <tr>
+                <th>Highlight</th>
+                <td><input onkeyup="update()" name="smarts" type="text" placeholder="SMARTS"></td>
+            </tr>
         </table>
     </div>
-    <table id="result">
-    </table>
+    <div id="result">
+    </div>
 </div>
 <script type="text/javascript">
     window.onload = update();
+
 </script>
 </body>
 </html>

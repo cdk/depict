@@ -1,46 +1,47 @@
 function update() {
   var input  = $('#input').val();
   var result = $('#result');
-  
-  $('#result tr').remove();
-  
+  result.empty();
+
   var opts = {
-              'style':    $("select[name='style'] option:selected").val(),
-              'annotate': $("select[name='annotate'] option:selected").val(),
-              'zoom':     $("input[name='zoom']").val()
+              'style':     $("select[name='style'] option:selected").val(),
+              'annotate':  $("select[name='annotate'] option:selected").val(),
+              'zoom':      $("input[name='zoom']").val(),
+              'sma':       $("input[name='smarts']").val(),
+              'suppressh': $("input[name='suppressh']").is(':checked'),
+              'showtitle': $("input[name='showtitle']").is(':checked'),
+              'abbr':      $("select[name='abbr'] option:selected").val()
               };
-                 
+
   var lines = input.split("\n");
-  var current_row = 0;
-  var row = $('<tr></tr>');
+
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].trim();
     
     // skip empty lines and comments
     if (line.length == 0 || line.charAt(0) === '#')
       continue
-          
-    var title = line.substring(line.indexOf(' ')+1);
-  	
-  	current_row++;
-  	row.append('<td>' + generate(opts, line, title) + '</td>');
-  	
-  	if (current_row == 3) {
-  	    result.append(row);
-  	    current_row = 0;
-  	    row = $('<tr></tr>');
-  	}
-  }
-  
-  if (current_row > 0) {
-    result.append(row);
+
+    var title = line.indexOf(' ') >= 0 ? line.substring(line.indexOf(' ')+1) : '';
+    title = title.replace(/^\|[^|]+\|\s+/, "");
+    console.log(generate(opts, line, title));
+  	result.append(generate(opts, line, title));
   }
 }
 
 function depict_url(opts, smiles, w, h) {
-	var url = 'depict/' + opts.style + '/svg?smi=' + encodeURIComponent(smiles);
+	var smi = encodeURIComponent(smiles);
+	// okay to not encode these
+	smi = smi.replace(/%3D/g, '=');
+	smi = smi.replace(/%5B/g, '[');
+	smi = smi.replace(/%5D/g, ']');
+	smi = smi.replace(/%40/g, '@');
+	var url = './depict/' + opts.style + '/svg?smi=' + smi;
 	if (w && h)
 	  url += '&w=' + w + '&h=' + h;
+	url += '&abbr=' + opts.abbr;
+	url += '&suppressh=' + opts.suppressh;
+	url += '&showtitle=' + opts.showtitle;
 	if (opts.sma)
 	  url += '&sma=' + encodeURIComponent(opts.sma);
 	if (opts.zoom)
@@ -51,10 +52,12 @@ function depict_url(opts, smiles, w, h) {
 }
 
 function generate(opts, smiles, title) {
-  	return '<table class="grid"><tr><td>' +
-  		   	'<a href="' + depict_url(opts, smiles) + '">' +	
-  	       	 '<img alt="No Image, Invalid SMILES?" class="chemimg" src="' + depict_url(opts, smiles, 80, 49) + '"/>' +
-  	       	'</a>' + 
-  	       '</td></tr>' +
-  	       '<tr><td class="chemtitle">' + title + '</td></tr></table>';
+    var isrxn  = smiles.indexOf('>') != -1;
+    var width  = isrxn ? '210' : '80';
+    var height = '50';
+    return $('<div>').addClass('chemdiv')
+                     .append($('<a>').attr('href', depict_url(opts, smiles))
+                                     .append($('<img>').addClass('chemimg')
+                                                       .addClass(isrxn ? 'chemrxn' : 'chemmol')
+                                                       .attr('src', depict_url(opts, smiles, width, height))));
 }

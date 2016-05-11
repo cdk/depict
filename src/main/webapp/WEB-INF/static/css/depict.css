@@ -3,15 +3,15 @@ body {
   font-size: 10pt;
   padding: 0;
   margin: 0;
+  background-color: #eee;
+  text-shadow: 2px 2px #fff;
 }
 
 .center {
 	margin: auto;
-	width: 260mm;
-	background-color: #ddf;
-	border-style: solid;
-	border-width: 0px 2px 0px 2px;
+	max-width:  260mm;
 	min-height: 100%;
+	text-align: center;
 }
 
 #options {
@@ -19,43 +19,53 @@ body {
 }
 
 .chemimg {
-	width: 80mm;
-	height: 49mm; 
+	margin-left:    auto;
+	margin-right:   auto;
+	vertical-align: middle;  /* vertical alignment of the inline element */
+	display: inline-block;
 }
 
-table.grid {
-	border-collapse: collapse;
-	margin: 0px;
-	font: inherit;
+.chemdiv a {
+  display: inline-block;
 }
 
-table.grid td {
-	border-collapse: collapse;
-	margin: 0px;
-	border-width: 0;
-	font: inherit;
+.chemrxn {
+  max-width:  210mm;
+  max-height: 50mm;
 }
 
-table.grid td.chemtitle {
-	max-width: 80mm;
-    font-size: 9pt;
-    font-weight: bold;
-    text-align: center;
+.chemmol {
+  max-width:  80mm;
+  max-height: 50mm;
 }
 
-table.grid th {
-	padding: 5px;
+.chemdiv {
+  display:          inline-block;
+  margin:           6px;
+  text-align:       center;
+  vertical-align:   middle;
+  background:       #fff;
+  border:           1px solid #777;
+  box-shadow:       2px 2px 8px #888;
+  line-height:      0;
+}
+
+#options th,
+#options input,
+#options select {
+  font-family: Futura;
+  font-size:   10pt;
+}
+
+#options input,
+#options select {
+  border: 1px solid #444;
+  border-radius: 2px;
+  font-size:   8pt;
 }
 
 #result {
 	margin: auto;
-	background-color: #ddf;
-}
-
-#result td {
-	border-width: 2px;
-	border-style: solid;
-	border-color: #ddf;
 }
 
 .textin {
@@ -68,7 +78,7 @@ table.grid th {
 }
 
 textarea {
-	width: 100%;
-	height: 100px;
+	width:  100%;
+	height: 150px;
 	resize: none;
 }
