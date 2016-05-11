@@ -19,30 +19,36 @@
 
 package org.openscience.cdk.app;
 
+import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.geometry.GeometryUtil;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.interfaces.IReaction;
+import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
-import org.openscience.cdk.renderer.color.CDKAtomColors;
 import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.color.UniColor;
-import org.openscience.cdk.renderer.generators.BasicSceneGenerator.BondLength;
-import org.openscience.cdk.renderer.generators.standard.SelectionVisibility;
-import org.openscience.cdk.renderer.generators.standard.StandardGenerator.HashSpacing;
+import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibility;
-import org.openscience.cdk.renderer.generators.standard.StandardGenerator.WaveSpacing;
+import org.openscience.cdk.sgroup.Sgroup;
+import org.openscience.cdk.sgroup.SgroupType;
+import org.openscience.cdk.silent.AtomContainer;
+import org.openscience.cdk.silent.PseudoAtom;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -50,18 +56,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.ac.ebi.beam.ExtendedSmilesParser;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point2d;
 import java.awt.Color;
-import java.awt.Font;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Chemical structure depiction controller.
@@ -69,20 +86,22 @@ import java.util.Set;
 @Controller
 public class DepictController {
 
-    // limit number of SMARTS matches
-    public static final int SMA_HIT_LIMIT = 50;
+    private final ExecutorService smartsExecutor = Executors.newFixedThreadPool(4);
 
     // chem object builder to create objects with
     private final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 
     // we make are raster depictions slightly smalled by default (40px bond length)
-    private final Font               font      = new Font(Font.SANS_SERIF, Font.PLAIN, 13);
-    private final DepictionGenerator generator = new DepictionGenerator(font).withParam(Visibility.class,
-                                                                                        SelectionVisibility.disconnected(SymbolVisibility.iupacRecommendationsWithoutTerminalCarbon()))
-                                                                             .withParam(BondLength.class, 26d)
-                                                                             .withParam(HashSpacing.class, 26 / 6d)
-                                                                             .withParam(WaveSpacing.class, 26 / 6d);
+    private final DepictionGenerator generator = new DepictionGenerator();
     private       SmilesParser       smipar    = new SmilesParser(builder);
+
+    private final Abbreviations abbreviations = new Abbreviations();
+    private final Abbreviations reagents      = new Abbreviations();
+
+    public DepictController() throws IOException {
+        int count = this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
+        this.reagents.loadFromFile("/org/openscience/cdk/app/agents.smi");
+    }
 
     /**
      * Home page redirect.
@@ -105,7 +124,6 @@ public class DepictController {
      * @param h        height of the image
      * @param sma      highlight SMARTS pattern
      * @return the depicted structure
-     * 
      * @throws CDKException something not okay with input
      * @throws IOException  problem reading/writing request
      */
@@ -113,27 +131,45 @@ public class DepictController {
     public HttpEntity<?> depict(@RequestParam("smi") String smi,
                                 @PathVariable("fmt") String fmt,
                                 @PathVariable("style") String style,
+                                @RequestParam(value = "suppressh", defaultValue = "true") boolean suppressh,
                                 @RequestParam(value = "anon", defaultValue = "off") String anon,
                                 @RequestParam(value = "zoom", defaultValue = "1.3") double zoom,
                                 @RequestParam(value = "annotate", defaultValue = "none") String annotate,
                                 @RequestParam(value = "w", defaultValue = "-1") int w,
                                 @RequestParam(value = "h", defaultValue = "-1") int h,
-                                @RequestParam(value = "sma", defaultValue = "") String sma) throws CDKException, IOException {
+                                @RequestParam(value = "abbr", defaultValue = "reagents") String abbr,
+                                @RequestParam(value = "sma", defaultValue = "") String sma,
+                                @RequestParam(value = "showtitle", defaultValue = "false") boolean showTitle,
+                                @RequestParam(value = "smalim", defaultValue = "100") int smaLimit) throws
+                                                                                                      CDKException,
+                                                                                                      IOException {
 
         // Note: DepictionGenerator is immutable
         DepictionGenerator myGenerator = generator.withSize(w, h)
                                                   .withZoom(zoom);
 
         // Configure style preset
-        myGenerator = withStyle(myGenerator, style);
+        myGenerator = withStyle(myGenerator, style).withParam(StandardGenerator.Highlighting.class,
+                                                              StandardGenerator.HighlightStyle.Colored);
 
         // Add annotations
         switch (annotate) {
             case "number":
                 myGenerator = myGenerator.withAtomNumbers();
+                abbr = "false";
                 break;
             case "mapidx":
                 myGenerator = myGenerator.withAtomMapNumbers();
+                abbr = "false";
+                break;
+            case "colmap":
+                myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
+                                                                           new Color(185, 255, 180),
+                                                                           new Color(255, 162, 162),
+                                                                           new Color(253, 139, 255),
+                                                                           new Color(255, 206, 86),
+                                                                           new Color(227, 227, 227)})
+                                         .withOuterGlowHighlight(6d);
                 break;
         }
 
@@ -141,27 +177,65 @@ public class DepictController {
         if (anon.equalsIgnoreCase("on")) {
             myGenerator = myGenerator.withParam(Visibility.class,
                                                 new SymbolVisibility() {
-                                                    @Override public boolean visible(IAtom iAtom, List<IBond> list, RendererModel rendererModel) {
+                                                    @Override
+                                                    public boolean visible(IAtom iAtom, List<IBond> list,
+                                                                           RendererModel rendererModel) {
                                                         return list.isEmpty();
                                                     }
                                                 });
         }
 
-        final boolean isRxn = smi.contains(">");
+        final boolean isRxn = !smi.contains("V2000") && isRxnSmi(smi);
+        final boolean isRgp = smi.contains("RG:");
         IReaction rxn = null;
         IAtomContainer mol = null;
+        List<IAtomContainer> mols = null;
 
-        if (isRxn)
-            rxn = loadRxn(smi);
-        else
+        Set<IChemObject> highlight;
+
+        if (isRxn) {
+            rxn = smipar.parseReactionSmiles(smi);
+            if (suppressh) {
+                for (IAtomContainer component : rxn.getReactants().atomContainers())
+                    AtomContainerManipulator.suppressHydrogens(component);
+                for (IAtomContainer component : rxn.getProducts().atomContainers())
+                    AtomContainerManipulator.suppressHydrogens(component);
+                for (IAtomContainer component : rxn.getAgents().atomContainers())
+                    AtomContainerManipulator.suppressHydrogens(component);
+            }
+
+            highlight = findHits(sma, rxn, mol, smaLimit);
+
+            for (IAtomContainer component : rxn.getReactants().atomContainers())
+                abbreviate(component, abbr, highlight);
+            for (IAtomContainer component : rxn.getProducts().atomContainers())
+                abbreviate(component, abbr, highlight);
+            for (IAtomContainer component : rxn.getAgents().atomContainers())
+                abbreviate(component, abbr, highlight);
+
+        } else {
             mol = loadMol(smi);
+            if (suppressh) {
+                AtomContainerManipulator.suppressHydrogens(mol);
+            }
+            highlight = findHits(sma, rxn, mol, smaLimit);
+            abbreviate(mol, abbr, highlight);
+        }
 
         // add highlight from atom/bonds hit by the provided SMARTS
-        myGenerator = myGenerator.withHighlight(findHits(sma, rxn, mol),
-                                                Color.RED);
+        myGenerator = myGenerator.withHighlight(highlight, Color.RED);
+
+        if (showTitle) {
+            if (isRxn)
+                myGenerator = myGenerator.withRxnTitle();
+            else
+                myGenerator = myGenerator.withMolTitle();
+        }
 
         // pre-render the depiction
-        final Depiction depiction = isRxn ? myGenerator.depict(rxn) : myGenerator.depict(mol);
+        final Depiction depiction = isRxn ? myGenerator.depict(rxn)
+                                          : isRgp ? myGenerator.depict(mols, mols.size(), 1)
+                                                  : myGenerator.depict(mol);
 
         final String fmtlc = fmt.toLowerCase(Locale.ROOT);
         switch (fmtlc) {
@@ -180,12 +254,34 @@ public class DepictController {
         throw new IllegalArgumentException("Unsupported format.");
     }
 
-    private IAtomContainer loadMol(String smi) throws InvalidSmilesException {
-        return smipar.parseSmiles(smi);
+    private void abbreviate(IAtomContainer mol, String mode, Set<IChemObject> highlight) {
+        switch (mode.toLowerCase()) {
+            case "true":
+            case "on":
+            case "yes":
+                reagents.apply(mol);
+                abbreviations.apply(mol);
+                break;
+            case "reagents":
+                reagents.apply(mol);
+                break;
+        }
     }
 
-    private IReaction loadRxn(String smi) throws InvalidSmilesException {
-        return smipar.parseReactionSmiles(smi);
+    private boolean isRxnSmi(String smi) {
+        return smi.split(" ")[0].contains(">");
+    }
+
+    private IAtomContainer loadMol(String str) throws CDKException {
+        if (str.contains("V2000")) {
+            try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
+                return mdlr.read(new AtomContainer(0, 0, 0, 0));
+            } catch (CDKException | IOException e3) {
+                throw new CDKException("Could not parse input");
+            }
+        } else {
+            return smipar.parseSmiles(str);
+        }
     }
 
     private HttpEntity<byte[]> makeResponse(byte[] bytes, String contentType) {
@@ -208,7 +304,7 @@ public class DepictController {
     private static DepictionGenerator withStyle(DepictionGenerator generator, String style) {
         switch (style) {
             case "cow":
-                generator = generator.withAtomColors(new CDKAtomColors())
+                generator = generator.withAtomColors(new CDK2DAtomColors())
                                      .withBackgroundColor(Color.WHITE);
                 break;
             case "bow":
@@ -223,6 +319,10 @@ public class DepictController {
                 generator = generator.withAtomColors(new CobColorer())
                                      .withBackgroundColor(Color.BLACK);
                 break;
+            case "nob":
+                generator = generator.withAtomColors(new NobColorer())
+                                     .withBackgroundColor(Color.BLACK);
+                break;
         }
         return generator;
     }
@@ -233,16 +333,48 @@ public class DepictController {
     private static final class CobColorer implements IAtomColorer {
         private final CDK2DAtomColors colors = new CDK2DAtomColors();
 
-        @Override public Color getAtomColor(IAtom atom) {
-            if (atom.getAtomicNumber() == 6 || atom.getAtomicNumber() == 1)
+        @Override
+        public Color getAtomColor(IAtom atom) {
+            Color res = colors.getAtomColor(atom);
+            if (res.equals(Color.BLACK))
                 return Color.WHITE;
-            return colors.getAtomColor(atom);
+            else
+                return res;
         }
 
-        @Override public Color getAtomColor(IAtom atom, Color color) {
-            if (atom.getAtomicNumber() == 6 || atom.getAtomicNumber() == 1)
+        @Override
+        public Color getAtomColor(IAtom atom, Color color) {
+            Color res = colors.getAtomColor(atom);
+            if (res.equals(Color.BLACK))
                 return Color.WHITE;
-            return colors.getAtomColor(atom, color);
+            else
+                return res;
+        }
+    }
+
+    /**
+     * Neon-on-black atom colors.
+     */
+    private static final class NobColorer implements IAtomColorer {
+        private final CDK2DAtomColors colors = new CDK2DAtomColors();
+        private final Color           NEON   = new Color(0x00FF0E);
+
+        @Override
+        public Color getAtomColor(IAtom atom) {
+            Color res = colors.getAtomColor(atom);
+            if (res.equals(Color.BLACK))
+                return NEON;
+            else
+                return res;
+        }
+
+        @Override
+        public Color getAtomColor(IAtom atom, Color color) {
+            Color res = colors.getAtomColor(atom, color);
+            if (res.equals(Color.BLACK))
+                return NEON;
+            else
+                return res;
         }
     }
 
@@ -254,7 +386,10 @@ public class DepictController {
      * @param mol molecule
      * @return set of matched atoms and bonds
      */
-    private Set<IChemObject> findHits(String sma, IReaction rxn, IAtomContainer mol) {
+    private Set<IChemObject> findHits(final String sma, final IReaction rxn, final IAtomContainer mol,
+                                      final int limit) {
+
+
         Set<IChemObject> highlight = new HashSet<>();
         if (!sma.isEmpty()) {
             SmartsPattern smartsPattern;
@@ -265,37 +400,35 @@ public class DepictController {
             }
             if (mol != null) {
                 for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(mol)
+                                                                    .limit(limit)
                                                                     .uniqueAtoms()
-                                                                    .limit(SMA_HIT_LIMIT)
+                                                                    .toAtomBondMap()) {
+                    for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
+                        highlight.add(e.getValue());
+                    }
+                }
+            } else if (rxn != null) {
+                // match all together
+                IAtomContainer combined = rxn.getBuilder().newInstance(IAtomContainer.class);
+
+                for (IAtomContainer reac : rxn.getReactants().atomContainers())
+                    combined.add(reac);
+                for (IAtomContainer prod : rxn.getProducts().atomContainers())
+                    combined.add(prod);
+                for (IAtomContainer agnt : rxn.getAgents().atomContainers())
+                    combined.add(agnt);
+
+                for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(combined)
+                                                                    .limit(limit)
+                                                                    .uniqueAtoms()
                                                                     .toAtomBondMap()) {
                     for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
                         highlight.add(e.getValue());
                     }
                 }
             }
-            else if (rxn != null) {
-                for (IAtomContainer reac : rxn.getReactants().atomContainers()) {
-                    for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(reac)
-                                                                        .uniqueAtoms()
-                                                                        .limit(SMA_HIT_LIMIT)
-                                                                        .toAtomBondMap()) {
-                        for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
-                            highlight.add(e.getValue());
-                        }
-                    }
-                }
-                for (IAtomContainer prod : rxn.getProducts().atomContainers()) {
-                    for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(prod)
-                                                                        .uniqueAtoms()
-                                                                        .limit(SMA_HIT_LIMIT)
-                                                                        .toAtomBondMap()) {
-                        for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
-                            highlight.add(e.getValue());
-                        }
-                    }
-                }
-            }
         }
         return highlight;
+
     }
 }
