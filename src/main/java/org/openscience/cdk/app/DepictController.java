@@ -19,19 +19,15 @@
 
 package org.openscience.cdk.app;
 
-import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.geometry.GeometryUtil;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
-import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.renderer.RendererModel;
@@ -41,10 +37,7 @@ import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.color.UniColor;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibility;
-import org.openscience.cdk.sgroup.Sgroup;
-import org.openscience.cdk.sgroup.SgroupType;
 import org.openscience.cdk.silent.AtomContainer;
-import org.openscience.cdk.silent.PseudoAtom;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
@@ -56,29 +49,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.ac.ebi.beam.ExtendedSmilesParser;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point2d;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Chemical structure depiction controller.
