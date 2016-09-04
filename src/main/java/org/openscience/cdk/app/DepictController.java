@@ -155,8 +155,7 @@ public class DepictController {
                                                   .withZoom(zoom);
 
         // Configure style preset
-        myGenerator = withStyle(myGenerator, style).withParam(StandardGenerator.Highlighting.class,
-                                                              StandardGenerator.HighlightStyle.Colored);
+        myGenerator = withStyle(myGenerator, style);
 
         // Add annotations
         switch (annotate) {
@@ -231,7 +230,22 @@ public class DepictController {
         }
 
         // add highlight from atom/bonds hit by the provided SMARTS
-        myGenerator = myGenerator.withHighlight(highlight, Color.RED);
+        switch (style) {
+            case "nob":
+                myGenerator = myGenerator.withHighlight(highlight,
+                                                        new Color(0xffaaaa));
+                break;
+            case "bow":
+            case "wob":
+                myGenerator = myGenerator.withHighlight(highlight,
+                                                        new Color(0xff0000));
+                break;
+            default:
+                myGenerator = myGenerator.withHighlight(highlight,
+                                                        new Color(0xaaffaa));
+                break;
+        }
+
 
         if (showTitle) {
             if (isRxn)
@@ -445,7 +459,8 @@ public class DepictController {
         switch (style) {
             case "cow":
                 generator = generator.withAtomColors(new CDK2DAtomColors())
-                                     .withBackgroundColor(Color.WHITE);
+                                     .withBackgroundColor(Color.WHITE)
+                                     .withOuterGlowHighlight();
                 break;
             case "bow":
                 generator = generator.withAtomColors(new UniColor(Color.BLACK))
@@ -457,11 +472,13 @@ public class DepictController {
                 break;
             case "cob":
                 generator = generator.withAtomColors(new CobColorer())
-                                     .withBackgroundColor(Color.BLACK);
+                                     .withBackgroundColor(Color.BLACK)
+                                     .withOuterGlowHighlight();
                 break;
             case "nob":
                 generator = generator.withAtomColors(new NobColorer())
-                                     .withBackgroundColor(Color.BLACK);
+                                     .withBackgroundColor(Color.BLACK)
+                                     .withOuterGlowHighlight();
                 break;
         }
         return generator;
