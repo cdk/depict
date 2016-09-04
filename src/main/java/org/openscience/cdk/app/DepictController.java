@@ -19,10 +19,16 @@
 
 package org.openscience.cdk.app;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
@@ -30,6 +36,7 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
@@ -37,11 +44,17 @@ import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.color.UniColor;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibility;
+import org.openscience.cdk.sgroup.Sgroup;
+import org.openscience.cdk.sgroup.SgroupKey;
+import org.openscience.cdk.sgroup.SgroupType;
+import org.openscience.cdk.silent.Atom;
 import org.openscience.cdk.silent.AtomContainer;
+import org.openscience.cdk.silent.Bond;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.ReactionManipulator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -49,13 +62,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.ac.ebi.beam.Configuration;
+import uk.ac.ebi.beam.Functions;
+import uk.ac.ebi.beam.Graph;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -124,9 +145,10 @@ public class DepictController {
                                 @RequestParam(value = "abbr", defaultValue = "reagents") String abbr,
                                 @RequestParam(value = "sma", defaultValue = "") String sma,
                                 @RequestParam(value = "showtitle", defaultValue = "false") boolean showTitle,
-                                @RequestParam(value = "smalim", defaultValue = "100") int smaLimit) throws
-                                                                                                      CDKException,
-                                                                                                      IOException {
+                                @RequestParam(value = "smalim", defaultValue = "100") int smaLimit,
+                                @RequestParam(value = "alignrxnmap", defaultValue = "true") boolean alignRxnMap) throws
+                                                                                                                 CDKException,
+                                                                                                                 IOException {
 
         // Note: DepictionGenerator is immutable
         DepictionGenerator myGenerator = generator.withSize(w, h)
@@ -144,7 +166,9 @@ public class DepictController {
                 break;
             case "mapidx":
                 myGenerator = myGenerator.withAtomMapNumbers();
-                abbr = "false";
+                break;
+            case "atomvalue":
+                myGenerator = myGenerator.withAtomValues();
                 break;
             case "colmap":
                 myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
@@ -156,6 +180,9 @@ public class DepictController {
                                          .withOuterGlowHighlight(6d);
                 break;
         }
+
+        // align rxn maps
+        myGenerator = myGenerator.withMappedRxnAlign(alignRxnMap);
 
         // Improved depiction of anatomised graphs, e.g. ***1*****1**
         if (anon.equalsIgnoreCase("on")) {
@@ -178,6 +205,9 @@ public class DepictController {
         Set<IChemObject> highlight;
 
         if (isRxn) {
+
+
+
             rxn = smipar.parseReactionSmiles(smi);
             if (suppressh) {
                 for (IAtomContainer component : rxn.getReactants().atomContainers())
@@ -188,22 +218,16 @@ public class DepictController {
                     AtomContainerManipulator.suppressHydrogens(component);
             }
 
+
             highlight = findHits(sma, rxn, mol, smaLimit);
-
-            for (IAtomContainer component : rxn.getReactants().atomContainers())
-                abbreviate(component, abbr, highlight);
-            for (IAtomContainer component : rxn.getProducts().atomContainers())
-                abbreviate(component, abbr, highlight);
-            for (IAtomContainer component : rxn.getAgents().atomContainers())
-                abbreviate(component, abbr, highlight);
-
+            abbreviate(rxn, abbr, annotate);
         } else {
             mol = loadMol(smi);
             if (suppressh) {
                 AtomContainerManipulator.suppressHydrogens(mol);
             }
             highlight = findHits(sma, rxn, mol, smaLimit);
-            abbreviate(mol, abbr, highlight);
+            abbreviate(mol, abbr, annotate);
         }
 
         // add highlight from atom/bonds hit by the provided SMARTS
@@ -238,17 +262,149 @@ public class DepictController {
         throw new IllegalArgumentException("Unsupported format.");
     }
 
-    private void abbreviate(IAtomContainer mol, String mode, Set<IChemObject> highlight) {
+    private void contractHydrates(IAtomContainer mol) {
+        Set<IAtom> hydrate = new HashSet<>();
+        for (IAtom atom : mol.atoms()) {
+            if (atom.getAtomicNumber() == 8 &&
+                atom.getImplicitHydrogenCount() == 2 &&
+                mol.getConnectedAtomsList(atom).size() == 0)
+                hydrate.add(atom);
+        }
+        if (hydrate.size() < 2)
+            return;
+        @SuppressWarnings("unchecked")
+        List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS, List.class);
+
+        if (sgroups == null)
+            mol.setProperty(CDKConstants.CTAB_SGROUPS,
+                            sgroups = new ArrayList<>());
+        else
+            sgroups = new ArrayList<>(sgroups);
+
+        Sgroup sgrp = new Sgroup();
+        for (IAtom atom : hydrate)
+            sgrp.addAtom(atom);
+        sgrp.putValue(SgroupKey.CtabParentAtomList,
+                      Collections.singleton(hydrate.iterator().next()));
+        sgrp.setType(SgroupType.CtabMultipleGroup);
+        sgrp.setSubscript(Integer.toString(hydrate.size()));
+
+        sgroups.add(sgrp);
+    }
+
+    private boolean add(Set<IAtom> set, Set<IAtom> atomsToAdd) {
+        boolean res = true;
+        for (IAtom atom : atomsToAdd) {
+             if (!set.add(atom))
+                 res = false;
+        }
+        return res;
+    }
+
+    private void abbreviate(IReaction rxn, String mode, String annotate) {
+        Multimap<IAtomContainer, Sgroup> sgroupmap = ArrayListMultimap.create();
         switch (mode.toLowerCase()) {
             case "true":
             case "on":
             case "yes":
+                for (IAtomContainer mol : ReactionManipulator.getAllAtomContainers(rxn)) {
+                    contractHydrates(mol);
+                    Set<IAtom> atoms = new HashSet<>();
+                    List<Sgroup> newSgroups = new ArrayList<>();
+                    for (Sgroup sgroup : reagents.generate(mol)) {
+                        if (add(atoms, sgroup.getAtoms()))
+                            newSgroups.add(sgroup);
+                    }
+                    for (Sgroup sgroup : abbreviations.generate(mol)) {
+                        if (add(atoms, sgroup.getAtoms()))
+                            newSgroups.add(sgroup);
+                    }
+                    sgroupmap.putAll(mol, newSgroups);
+                }
+                for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
+                    contractHydrates(mol);
+                    reagents.apply(mol);
+                    abbreviations.apply(mol);
+                }
+                break;
+            case "reagents":
+                for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
+                    contractHydrates(mol);
+                    reagents.apply(mol);
+                }
+                break;
+        }
+
+        Set<String> include = new HashSet<>();
+        for (Map.Entry<IAtomContainer, Sgroup> e : sgroupmap.entries()) {
+            final IAtomContainer mol = e.getKey();
+            final Sgroup abbrv = e.getValue();
+            int numAtoms = mol.getAtomCount();
+            if (abbrv.getBonds().isEmpty()) {
+                include.add(abbrv.getSubscript());
+            } else {
+                int numAbbr = abbrv.getAtoms().size();
+                double f = numAbbr / (double) numAtoms;
+                if (numAtoms - numAbbr > 1 && f <= 0.4) {
+                    include.add(abbrv.getSubscript());
+                }
+            }
+        }
+
+        for (Map.Entry<IAtomContainer, Collection<Sgroup>> e : sgroupmap.asMap().entrySet()) {
+            final IAtomContainer mol = e.getKey();
+
+            List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS);
+            if (sgroups == null)
+                sgroups = new ArrayList<>();
+            else
+                sgroups = new ArrayList<>(sgroups);
+            mol.setProperty(CDKConstants.CTAB_SGROUPS, sgroups);
+
+            for (Sgroup abbrv : e.getValue()){
+                if (include.contains(abbrv.getSubscript()))
+                    sgroups.add(abbrv);
+            }
+        }
+    }
+
+    private void abbreviate(IAtomContainer mol, String mode, String annotate) {
+        switch (mode.toLowerCase()) {
+            case "true":
+            case "on":
+            case "yes":
+                contractHydrates(mol);
                 reagents.apply(mol);
                 abbreviations.apply(mol);
                 break;
             case "reagents":
+                contractHydrates(mol);
                 reagents.apply(mol);
                 break;
+        }
+        // remove abbreviations of mapped atoms
+        if ("mapidx".equals(annotate)) {
+            List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS);
+            List<Sgroup> filtered = new ArrayList<>();
+            if (sgroups != null) {
+                for (Sgroup sgroup : sgroups) {
+                    // turn off display short-cuts
+                    if (sgroup.getType() == SgroupType.CtabAbbreviation ||
+                        sgroup.getType() == SgroupType.CtabMultipleGroup) {
+                        boolean okay = true;
+                        for (IAtom atom : sgroup.getAtoms()) {
+                            if (atom.getProperty(CDKConstants.ATOM_ATOM_MAPPING) != null) {
+                                okay = false;
+                                break;
+                            }
+                        }
+                        if (okay) filtered.add(sgroup);
+                    } else {
+                        filtered.add(sgroup);
+                    }
+                }
+                mol.setProperty(CDKConstants.CTAB_SGROUPS, filtered);
+            }
         }
     }
 
