@@ -548,17 +548,7 @@ public class DepictController {
                     }
                 }
             } else if (rxn != null) {
-                // match all together
-                IAtomContainer combined = rxn.getBuilder().newInstance(IAtomContainer.class);
-
-                for (IAtomContainer reac : rxn.getReactants().atomContainers())
-                    combined.add(reac);
-                for (IAtomContainer prod : rxn.getProducts().atomContainers())
-                    combined.add(prod);
-                for (IAtomContainer agnt : rxn.getAgents().atomContainers())
-                    combined.add(agnt);
-
-                for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(combined)
+                for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(rxn)
                                                                     .limit(limit)
                                                                     .uniqueAtoms()
                                                                     .toAtomBondMap()) {
