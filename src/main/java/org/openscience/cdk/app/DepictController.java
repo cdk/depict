@@ -321,14 +321,20 @@ public class DepictController {
             case "true":
             case "on":
             case "yes":
-                for (IAtomContainer mol : ReactionManipulator.getAllAtomContainers(rxn)) {
+                for (IAtomContainer mol : rxn.getReactants().atomContainers()) {
                     contractHydrates(mol);
                     Set<IAtom> atoms = new HashSet<>();
                     List<Sgroup> newSgroups = new ArrayList<>();
-                    for (Sgroup sgroup : reagents.generate(mol)) {
+                    for (Sgroup sgroup : abbreviations.generate(mol)) {
                         if (add(atoms, sgroup.getAtoms()))
                             newSgroups.add(sgroup);
                     }
+                    sgroupmap.putAll(mol, newSgroups);
+                }
+                for (IAtomContainer mol : rxn.getProducts().atomContainers()) {
+                    contractHydrates(mol);
+                    Set<IAtom> atoms = new HashSet<>();
+                    List<Sgroup> newSgroups = new ArrayList<>();
                     for (Sgroup sgroup : abbreviations.generate(mol)) {
                         if (add(atoms, sgroup.getAtoms()))
                             newSgroups.add(sgroup);
@@ -338,6 +344,12 @@ public class DepictController {
                 for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
                     contractHydrates(mol);
                     reagents.apply(mol);
+                    abbreviations.apply(mol);
+                }
+                break;
+            case "groups":
+                for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
+                    contractHydrates(mol);
                     abbreviations.apply(mol);
                 }
                 break;
@@ -387,13 +399,12 @@ public class DepictController {
             case "true":
             case "on":
             case "yes":
+            case "groups":
                 contractHydrates(mol);
-                reagents.apply(mol);
                 abbreviations.apply(mol);
                 break;
             case "reagents":
                 contractHydrates(mol);
-                reagents.apply(mol);
                 break;
         }
         // remove abbreviations of mapped atoms
