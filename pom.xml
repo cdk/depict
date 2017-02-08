@@ -10,7 +10,7 @@
     <packaging>war</packaging>
 
     <properties>
-        <cdk.version>1.5.14-SNAPSHOT</cdk.version>
+        <cdk.version>2.0-SNAPSHOT</cdk.version>
     </properties>
 
     <dependencies>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>uk.ac.ebi.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>0.9.2-SNAPSHOT</version>
+            <version>0.9.3</version>
         </dependency>
     </dependencies>
 
