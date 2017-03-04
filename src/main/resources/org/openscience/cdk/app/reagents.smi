@@ -10,6 +10,7 @@
 [K+].[K+].O=C([O-])[O-] K2CO3
 [Na+].[Na+].O=C([O-])[O-] Na2CO3
 [H-].[H-].[H-].[H-].[Li+].[Al+3] LAH
+[Li+].[AlH4-] LAH
 [Na+].[OH-] NaOH
 [K+].[OH-] KOH
 [Li+].[OH-] LiOH
