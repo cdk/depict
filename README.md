@@ -13,16 +13,16 @@ target directory. The WAR file can be deployed to an application server (e.g.
 TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded server.
 
 ```
-$ target/cdkdepict-0.1.war
-$ target/cdkdepict-0.1.jar
+$ target/cdkdepict-0.2.war
+$ target/cdkdepict-0.2.jar
 ```
 
 #### Prepacked release
 
 You can download prebuilt releases from GitHub:
  
- * [`cdkdepict-0.1.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.1.war)
- * [`cdkdepict-0.1.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.1.jar)
+ * [`cdkdepict-0.2.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.2.war)
+ * [`cdkdepict-0.2.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.2.jar)
 
 #### Embedded App
 
