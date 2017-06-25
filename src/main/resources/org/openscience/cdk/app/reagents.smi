@@ -17,6 +17,7 @@
 [Na+].[BH4-] NaBH4
 
 # Common Agents
+[H][H] H2
 O1CCCC1 THF
 ClCCl DCM
 O=CN(C)C DMF
