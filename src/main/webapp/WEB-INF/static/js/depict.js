@@ -8,7 +8,7 @@ function update() {
               'annotate':  $("select[name='annotate'] option:selected").val(),
               'zoom':      $("input[name='zoom']").val(),
               'sma':       $("input[name='smarts']").val(),
-              'suppressh': $("input[name='suppressh']").is(':checked'),
+              'hdisp':     $("select[name='hdisp'] option:selected").val(),
               'showtitle': $("input[name='showtitle']").is(':checked'),
               'abbr':      $("select[name='abbr'] option:selected").val()
               };
@@ -40,7 +40,7 @@ function depict_url(opts, smiles, w, h) {
 	if (w && h)
 	  url += '&w=' + w + '&h=' + h;
 	url += '&abbr=' + opts.abbr;
-	url += '&suppressh=' + opts.suppressh;
+	url += '&hdisp=' + opts.hdisp;
 	url += '&showtitle=' + opts.showtitle;
 	if (opts.sma)
 	  url += '&sma=' + encodeURIComponent(opts.sma);
