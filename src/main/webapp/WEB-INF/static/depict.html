@@ -76,13 +76,19 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
                         <option value="mapidx">Atom Mapping</option>
                         <option value="colmap">Color Map</option>
                         <option value="atomvalue">Atom Value</option>
+                        <option value="cip">CIP Stereo Label</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <th>Suppress Hydrogens</th>
+                <th>Hydrogen Display</th>
                 <td>
-                    <input type="checkbox" name="suppressh" onchange="update()" checked>
+                    <select name="hdisp" onchange="update()">
+                        <option value="minimal">Minimal</option>
+                        <option value="stereo">Stereochemistry Only</option>
+                        <option value="bridgehead" selected>Bridge Head Tetrahedral Only</option>
+                        <option value="provided">As Provided</option>
+                    </select>
                 </td>
             </tr>
             <tr>
