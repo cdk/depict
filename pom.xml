@@ -10,8 +10,8 @@
     <packaging>war</packaging>
 
     <properties>
-        <cdk.version>2.1-SNAPSHOT</cdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cdk.version>2.1-SNAPSHOT</cdk.version>
     </properties>
 
     <dependencies>
@@ -34,6 +34,11 @@
             <groupId>uk.ac.ebi.beam</groupId>
             <artifactId>beam-core</artifactId>
             <version>0.9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.simolecule</groupId>
+            <artifactId>centres-cdk</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
