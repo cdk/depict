@@ -8,8 +8,8 @@ A web application for generating chemical structure depictions from SMILES.
 
 You can download prebuilt releases from GitHub:
  
- * [`cdkdepict-0.3.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.3.war)
- * [`cdkdepict-0.3.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.3.jar)
+ * [`cdkdepict-0.3.war`](https://github.com/cdk/depict/releases/download/0.3/cdkdepict-0.3.war)
+ * [`cdkdepict-0.3.jar`](https://github.com/cdk/depict/releases/download/0.3/cdkdepict-0.3.jar)
 
 #### Build
 
