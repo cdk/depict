@@ -1,6 +1,15 @@
 # CDK Depict
 
-A small web service application for generating chemical structure depictions. A public web serivce is hosted at: [http://www.simolecule.com/cdkdepict](http://www.simolecule.com/cdkdepict).
+A web application for generating chemical structure depictions from SMILES.
+
+## Public Instance: [http://www.simolecule.com/cdkdepict](http://www.simolecule.com/cdkdepict)
+
+#### Prepacked release
+
+You can download prebuilt releases from GitHub:
+ 
+ * [`cdkdepict-0.3.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.3.war)
+ * [`cdkdepict-0.3.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.3.jar)
 
 #### Build
 
@@ -13,16 +22,9 @@ target directory. The WAR file can be deployed to an application server (e.g.
 TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded server.
 
 ```
-$ target/cdkdepict-0.2.war
-$ target/cdkdepict-0.2.jar
+$ target/cdkdepict-0.3.war
+$ target/cdkdepict-0.3.jar
 ```
-
-#### Prepacked release
-
-You can download prebuilt releases from GitHub:
- 
- * [`cdkdepict-0.2.war`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.2.war)
- * [`cdkdepict-0.2.jar`](https://github.com/cdk/depict/releases/download/0.1/cdkdepict-0.2.jar)
 
 #### Embedded App
 
@@ -31,13 +33,14 @@ Run the following command and access the site 'http://localhost:8081' by web
 browser.
 
 ```
-$ java -jar target/cdkdepict-0.1.jar -httpPort 8081
+$ java -jar target/cdkdepict-0.3.jar -httpPort 8081
 ```
 
 #### Libraries
 
  * [Spring](http://spring.io/)
  * [Chemistry Development Kit](http://github.com/cdk/cdk)
+ * [Centres](http://github.com/simolecule/cdkdepict)
 
 #### License
 
