@@ -81,6 +81,7 @@ CC(C)(C)OC(*)=O Boc
 *C(F)(F)F CF3
 *C(F)(F) CHF2
 *C=O CHO
+*[Si](C)(C)C(C)(C)C TBS
 
 # linear alkyls
 *CCCCCCCCCCCCCCCCCCCC n-Icosyl
