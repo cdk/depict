@@ -141,7 +141,8 @@ public class DepictController {
                               @RequestParam(value = "sma", defaultValue = "") String sma,
                               @RequestParam(value = "showtitle", defaultValue = "false") boolean showTitle,
                               @RequestParam(value = "smalim", defaultValue = "100") int smaLimit,
-                              @RequestParam(value = "alignrxnmap", defaultValue = "true") boolean alignRxnMap) throws
+                              @RequestParam(value = "alignrxnmap", defaultValue = "true") boolean alignRxnMap,
+                              @RequestParam Map<String,String> params) throws
           CDKException,
           IOException
   {
@@ -164,6 +165,8 @@ public class DepictController {
             break;
           case "bridgeheadtetrahedral":
           case "bridgehead":
+          case "default":
+          case "smart":
             hDisplayType = HydrogenDisplayType.BridgeHeadTetrahedralOnly;
             break;
         }
@@ -634,9 +637,18 @@ public class DepictController {
                              .withBackgroundColor(Color.WHITE)
                              .withOuterGlowHighlight();
         break;
+      case "cot":
+        generator = generator.withAtomColors(new CDK2DAtomColors())
+                             .withBackgroundColor(new Color(0,0,0,0))
+                             .withOuterGlowHighlight();
+        break;
       case "bow":
         generator = generator.withAtomColors(new UniColor(Color.BLACK))
                              .withBackgroundColor(Color.WHITE);
+        break;
+      case "bot":
+        generator = generator.withAtomColors(new UniColor(Color.BLACK))
+                             .withBackgroundColor(new Color(0,0,0,0));
         break;
       case "wob":
         generator = generator.withAtomColors(new UniColor(Color.WHITE))
