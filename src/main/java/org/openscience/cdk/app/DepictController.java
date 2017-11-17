@@ -21,6 +21,7 @@ package org.openscience.cdk.app;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.simolecule.centres.CdkLabeller;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
@@ -40,6 +41,7 @@ import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
 import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.color.UniColor;
+import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibility;
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupKey;
@@ -50,6 +52,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.ReactionManipulator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -174,28 +177,8 @@ public class DepictController {
     // Configure style preset
     myGenerator = withStyle(myGenerator, style);
 
-    // Add annotations
-    switch (annotate) {
-      case "number":
-        myGenerator = myGenerator.withAtomNumbers();
-        abbr = "false";
-        break;
-      case "mapidx":
-        myGenerator = myGenerator.withAtomMapNumbers();
-        break;
-      case "atomvalue":
-        myGenerator = myGenerator.withAtomValues();
-        break;
-      case "colmap":
-        myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
-                new Color(185, 255, 180),
-                new Color(255, 162, 162),
-                new Color(253, 139, 255),
-                new Color(255, 206, 86),
-                new Color(227, 227, 227)})
-                                 .withOuterGlowHighlight(6d);
-        break;
-    }
+    myGenerator = myGenerator.withAnnotationScale(0.7)
+                             .withAnnotationColor(Color.RED);
 
     // align rxn maps
     myGenerator = myGenerator.withMappedRxnAlign(alignRxnMap);
@@ -223,16 +206,12 @@ public class DepictController {
 
     if (isRxn) {
       rxn = smipar.parseReactionSmiles(smi);
-      switch (hDisplayType) {
-        case Minimal:
-          for (IAtomContainer component : rxn.getReactants().atomContainers())
-            setHydrogenDisplay(component, hDisplayType);
-          for (IAtomContainer component : rxn.getProducts().atomContainers())
-            setHydrogenDisplay(component, hDisplayType);
-          for (IAtomContainer component : rxn.getAgents().atomContainers())
-            setHydrogenDisplay(component, hDisplayType);
-          break;
-      }
+      for (IAtomContainer component : rxn.getReactants().atomContainers())
+        setHydrogenDisplay(component, hDisplayType);
+      for (IAtomContainer component : rxn.getProducts().atomContainers())
+        setHydrogenDisplay(component, hDisplayType);
+      for (IAtomContainer component : rxn.getAgents().atomContainers())
+        setHydrogenDisplay(component, hDisplayType);
       highlight = findHits(sma, rxn, mol, smaLimit);
       abbreviate(rxn, abbr, annotate);
     } else {
@@ -240,6 +219,38 @@ public class DepictController {
       setHydrogenDisplay(mol, hDisplayType);
       highlight = findHits(sma, rxn, mol, smaLimit);
       abbreviate(mol, abbr, annotate);
+    }
+
+    // Add annotations
+    switch (annotate) {
+      case "number":
+        myGenerator = myGenerator.withAtomNumbers();
+        abbr = "false";
+        break;
+      case "mapidx":
+        myGenerator = myGenerator.withAtomMapNumbers();
+        break;
+      case "atomvalue":
+        myGenerator = myGenerator.withAtomValues();
+        break;
+      case "colmap":
+        myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
+                new Color(185, 255, 180),
+                new Color(255, 162, 162),
+                new Color(253, 139, 255),
+                new Color(255, 206, 86),
+                new Color(227, 227, 227)})
+                                 .withOuterGlowHighlight(6d);
+        break;
+      case "cip":
+        if (isRxn) {
+          for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn)) {
+            annotateCip(part);
+          }
+        } else {
+          annotateCip(mol);
+        }
+        break;
     }
 
     // add highlight from atom/bonds hit by the provided SMARTS
@@ -289,6 +300,21 @@ public class DepictController {
     throw new IllegalArgumentException("Unsupported format.");
   }
 
+  private void annotateCip(IAtomContainer part)
+  {
+    CdkLabeller.label(part);
+    for (IAtom atom : part.atoms()) {
+      if (atom.getProperty("cip.label") != null)
+        atom.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                         StandardGenerator.ITALIC_DISPLAY_PREFIX + atom.getProperty("cip.label"));
+    }
+    for (IBond bond : part.bonds()) {
+      if (bond.getProperty("cip.label") != null)
+        bond.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                         StandardGenerator.ITALIC_DISPLAY_PREFIX + bond.getProperty("cip.label"));
+    }
+  }
+
   private void setHydrogenDisplay(IAtomContainer mol, HydrogenDisplayType hDisplayType)
   {
     switch (hDisplayType) {
@@ -334,8 +360,8 @@ public class DepictController {
               ses.add(se);
               break;
           }
-          mol.setStereoElements(ses);
         }
+        mol.setStereoElements(ses);
       }
       break;
       case BridgeHeadTetrahedralOnly: {
@@ -347,7 +373,7 @@ public class DepictController {
             case IStereoElement.Tetrahedral: {
               IAtom focus = (IAtom) se.getFocus();
               if (focus.getImplicitHydrogenCount() == 1 &&
-                  getNumRingsBonds(mol.getConnectedBondsList(focus)) == 3) {
+                  shouldAddH(mol, focus, mol.getConnectedBondsList(focus))) {
                 focus.setImplicitHydrogenCount(0);
                 IAtom          hydrogen = sproutHydrogen(mol, focus);
                 IStereoElement tmp      = se.map(Collections.singletonMap(focus, hydrogen));
@@ -363,8 +389,8 @@ public class DepictController {
               ses.add(se);
               break;
           }
-          mol.setStereoElements(ses);
         }
+        mol.setStereoElements(ses);
       }
       break;
       case Provided:
@@ -373,13 +399,22 @@ public class DepictController {
     }
   }
 
-  private int getNumRingsBonds(Iterable<IBond> bonds) {
+  private boolean shouldAddH(IAtomContainer mol, IAtom atom, Iterable<IBond> bonds) {
     int count = 0;
     for (IBond bond : bonds) {
-      if (bond.isInRing())
+      if (bond.isInRing()) {
         ++count;
+      } else {
+        IAtom nbr = bond.getOther(atom);
+        for (IStereoElement se : mol.stereoElements()) {
+          if (se.getConfigClass() == IStereoElement.TH &&
+                  se.getFocus().equals(nbr)) {
+            count++;
+          }
+        }
+      }
     }
-    return count;
+    return count == 3;
   }
 
   private IAtom sproutHydrogen(IAtomContainer mol, IAtom focus)
@@ -387,6 +422,7 @@ public class DepictController {
     IAtom hydrogen = mol.getBuilder().newAtom();
     hydrogen.setAtomicNumber(1);
     hydrogen.setSymbol("H");
+    hydrogen.setImplicitHydrogenCount(0);
     mol.addAtom(hydrogen);
     mol.addBond(mol.indexOf(focus), mol.getAtomCount() - 1, IBond.Order.SINGLE);
     return hydrogen;
@@ -578,6 +614,7 @@ public class DepictController {
     String      subtype = contentType.substring(contentType.indexOf('/') + 1, contentType.length());
     header.setContentType(new MediaType(type, subtype));
     header.add("Access-Control-Allow-Origin", "*");
+    header.set(HttpHeaders.CACHE_CONTROL, "max-age=31536000");
     header.setContentLength(bytes.length);
     return new HttpEntity<>(bytes, header);
   }
