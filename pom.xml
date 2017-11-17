@@ -6,7 +6,7 @@
 
     <groupId>com.nextmovesoftware</groupId>
     <artifactId>cdkdepict</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <packaging>war</packaging>
 
     <properties>
