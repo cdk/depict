@@ -99,6 +99,7 @@ public class DepictController {
   {
     int count = this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
     this.reagents.loadFromFile("/org/openscience/cdk/app/reagents.smi");
+    abbreviations.setContractOnHetero(false);
   }
 
   /**
