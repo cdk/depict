@@ -1,6 +1,6 @@
 # CDK Depict
 
-A small web service application for generating chemical structure depictions. 
+A small web service application for generating chemical structure depictions. A public web serivce is hosted at: [http://www.simolecule.com/cdkdepict](http://www.simolecule.com/cdkdepict).
 
 #### Build
 
