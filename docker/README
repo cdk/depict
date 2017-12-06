@@ -1,0 +1,23 @@
+Build
+=====
+
+To build the 'cdk/depict' container copy the JAR file built with MAVEN 
+to the directory with the Docker file.
+
+	$ cp ../target/cdkdepict*.jar cdkdepict.jar
+	$ docker build -t cdk/depict -f Dockerfile .
+
+Alternatively run the 'build.sh' script.
+
+	$ ./build.sh
+
+Run
+===
+
+The web service is exposed through port 8080. To expose locally on port 8180 we
+run the following command.
+
+	docker run -it -p 8180:8080 cdk/depict
+
+Note that when using docker-machine (e.g. VirtualBox) you will need to forward
+the host/guest port there as well.
