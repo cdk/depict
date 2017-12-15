@@ -4,7 +4,7 @@ A web application for generating chemical structure depictions from SMILES.
 
 ## Public Instance: [http://www.simolecule.com/cdkdepict](http://www.simolecule.com/cdkdepict)
 
-#### Run with Docker
+## Docker
 
 To launch a CDK Depict web serivce running on 8081:
 
@@ -50,7 +50,7 @@ A docker container (using alpine linux) can be built and run as follows:
 
 ```
 $ cd docker && ./build.sh
-$ docker run -p 8180:8080 cdk/depict
+$ docker run -p 8180:8080 cdkdepict
 ```
 
 #### Libraries
