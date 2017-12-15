@@ -33,7 +33,7 @@
         <dependency>
             <groupId>uk.ac.ebi.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>0.9.4</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.simolecule</groupId>
@@ -46,6 +46,12 @@
         <repository>
             <id>OSSRH</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
