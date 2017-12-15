@@ -44,6 +44,15 @@ browser.
 $ java -jar target/cdkdepict-0.3.jar -httpPort 8081
 ```
 
+### Docker container
+
+A docker container (using alpine linux) can be built and run as follows:
+
+```
+$ cd docker && ./build.sh
+$ docker run -p 8180:8080 cdk/depict
+```
+
 #### Libraries
 
  * [Spring](http://spring.io/)
