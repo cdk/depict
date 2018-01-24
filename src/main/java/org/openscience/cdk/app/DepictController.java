@@ -607,7 +607,13 @@ public class DepictController {
         throw new CDKException("Could not parse input");
       }
     } else {
-      return smipar.parseSmiles(str);
+      try {
+        return smipar.parseSmiles(str);
+      } catch (CDKException ex) {
+        SmilesParser smipar2 = new SmilesParser(builder);
+        smipar2.kekulise(false);
+        return smipar2.parseSmiles(str);
+      }
     }
   }
 
