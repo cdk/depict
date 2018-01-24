@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cdk.version>2.1-SNAPSHOT</cdk.version>
+        <cdk.version>2.2-SNAPSHOT</cdk.version>
     </properties>
 
     <dependencies>
