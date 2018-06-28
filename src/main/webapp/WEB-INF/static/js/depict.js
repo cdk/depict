@@ -1,3 +1,11 @@
+function clearInput() {
+  $('#input').val('');
+}
+
+function toggleExtraOpts() {
+  $('#depict_extra_opts').slideToggle();
+}
+
 function update() {
   var input  = $('#input').val();
   var result = $('#result');
@@ -24,7 +32,8 @@ function update() {
 
     var title = line.indexOf(' ') >= 0 ? line.substring(line.indexOf(' ')+1) : '';
     title = title.replace(/^\|[^|]+\|\s+/, "");
-    console.log(generate(opts, line, title));
+    if (!title)
+      title = "#" + (1+i);
   	result.append(generate(opts, line, title));
   }
 }
@@ -59,5 +68,6 @@ function generate(opts, smiles, title) {
                      .append($('<a>').attr('href', depict_url(opts, smiles))
                                      .append($('<img>').addClass('chemimg')
                                                        .addClass(isrxn ? 'chemrxn' : 'chemmol')
-                                                       .attr('src', depict_url(opts, smiles, width, height))));
+                                                       .attr('src', depict_url(opts, smiles, width, height))))
+                     .append($('<div>').append(title));
 }
