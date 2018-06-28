@@ -6,6 +6,16 @@ function toggleExtraOpts() {
   $('#depict_extra_opts').slideToggle();
 }
 
+function smittl(smiles) {
+  var i = smiles.indexOf(' ');
+  var j = smiles.indexOf('\t');
+  if (j >= 0 && (j < i || i < 0))
+    i = j;
+  if (i < 0)
+    return ''; // no title
+  return smiles.substring(i+1);
+}
+
 function update() {
   var input  = $('#input').val();
   var result = $('#result');
@@ -21,16 +31,21 @@ function update() {
               'abbr':      $("select[name='abbr'] option:selected").val()
               };
 
-  var lines = input.split("\n");
+  var lines  = input.split("\n");
+  var nlines = lines.length < 500 ? lines.length : 500;
 
-  for (var i = 0; i < lines.length; i++) {
+  if (lines.length > 500) {
+    alert("Only the first 500 structure will be displayed!");
+  }
+
+  for (var i = 0; i < nlines; i++) {
     var line = lines[i].trim();
     
     // skip empty lines and comments
     if (line.length == 0 || line.charAt(0) === '#')
       continue
 
-    var title = line.indexOf(' ') >= 0 ? line.substring(line.indexOf(' ')+1) : '';
+    var title = smittl(line);
     title = title.replace(/^\|[^|]+\|\s+/, "");
     if (!title)
       title = "#" + (1+i);
