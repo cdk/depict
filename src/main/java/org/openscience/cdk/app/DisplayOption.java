@@ -27,8 +27,8 @@ public enum DisplayOption {
 enum HydrogenDisplayType {
   Provided,
   Minimal,
-  StereoOnly,
-  BridgeHeadTetrahedralOnly;
+  Stereo,
+  Smart;
 }
 
 enum StyleType {

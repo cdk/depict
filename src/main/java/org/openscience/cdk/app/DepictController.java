@@ -21,6 +21,7 @@ package org.openscience.cdk.app;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.simolecule.centres.BaseMol;
 import com.simolecule.centres.CdkLabeller;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.depict.Abbreviations;
@@ -41,6 +42,7 @@ import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
 import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.color.UniColor;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibility;
 import org.openscience.cdk.sgroup.Sgroup;
@@ -50,6 +52,7 @@ import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
+import org.openscience.cdk.stereo.ExtendedTetrahedral;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
@@ -67,8 +70,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -95,6 +100,34 @@ public class DepictController {
   private final Abbreviations abbreviations = new Abbreviations();
   private final Abbreviations reagents      = new Abbreviations();
 
+  private enum Param {
+    // match highlighting
+    SMARTSHITLIM("smalim", 100),
+    SMARTSQUERY("sma", ""),
+    // model options
+    HDISPLAY("hdisp", false),
+    ALIGNRXNMAP("alignrxnmap", true),
+    ANON("anon", false),
+    SUPRESSH("suppressh", true),
+    ANNOTATE("annotate", "none"),
+    ABBREVIATE("abbr", "reagents"),
+    // rendering param
+    BGCOLOR("bgcolor", "default"),
+    FGCOLOR("fgcolor", "default"),
+    SHOWTITLE("showtitle", false),
+    ZOOM("zoom", 1.3),
+    WIDTH("w", -1),
+    HEIGHT("h", -1),
+    SVGUNITS("svgunits", "mm");
+    private final String name;
+    private final Object defaultValue;
+
+    Param(String name, Object defaultValue) {
+      this.name = name;
+      this.defaultValue = defaultValue;
+    }
+  }
+
   public DepictController() throws IOException
   {
     int count = this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
@@ -111,18 +144,141 @@ public class DepictController {
     return "redirect:/depict.html";
   }
 
+  private String getString(Param param, Map<String,String> params) {
+    String value = params.get(param.name);
+    if (value != null)
+      return value;
+    return param.defaultValue != null ? param.defaultValue.toString() : "";
+  }
+
+  private double getDouble(Param param, Map<String,String> params) {
+    String value = getString(param, params);
+    if (value.isEmpty()) {
+      if (param.defaultValue != null)
+        return (double) param.defaultValue;
+      throw new IllegalArgumentException(param.name + " not provided and no default!");
+    }
+    return Double.parseDouble(value);
+  }
+
+  private int getInt(Param param, Map<String,String> params) {
+    String value = getString(param, params);
+    if (value.isEmpty()) {
+      if (param.defaultValue != null)
+        return (int) param.defaultValue;
+      throw new IllegalArgumentException(param.name + " not provided and no default!");
+    }
+    return Integer.parseInt(value);
+  }
+
+  private boolean getBoolean(Param param, Map<String,String> params) {
+    String value = params.get(param.name);
+    if (value != null) {
+      switch (value.toLowerCase(Locale.ROOT)) {
+        case "f":
+        case "false":
+        case "off":
+        case "0":
+          return false;
+        case "t":
+        case "true":
+        case "on":
+        case "1":
+          return true;
+        default:
+          throw new IllegalArgumentException("Can not interpret boolean string param: " + value);
+      }
+    }
+    return param.defaultValue != null && (boolean) param.defaultValue;
+  }
+
+  static Color getColor(String color) {
+    int vals[] = new int[]{0,0,0,255}; // r,g,b,a
+    int pos = 0;
+    int beg = 0;
+    if (color.startsWith("0x"))
+      beg = 2;
+    else if (color.startsWith("#"))
+      beg = 1;
+    for (; pos < 4 && beg+1 < color.length(); beg += 2) {
+      vals[pos++] = Integer.parseInt(color.substring(beg,beg+2), 16);
+    }
+    return new Color(vals[0], vals[1], vals[2], vals[3]);
+  }
+
+  private HydrogenDisplayType getHydrogenDisplay(Map<String,String> params) {
+    if (!getBoolean(Param.SUPRESSH, params)) {
+      return HydrogenDisplayType.Provided;
+    } else {
+      switch (getString(Param.HDISPLAY, params)) {
+          case "suppressed":
+            return HydrogenDisplayType.Minimal;
+          case "provided":
+            return HydrogenDisplayType.Provided;
+          case "stereo":
+            return HydrogenDisplayType.Stereo;
+          case "bridgeheadtetrahedral":
+          case "bridgehead":
+          case "default":
+          case "smart":
+            return HydrogenDisplayType.Smart;
+          default:
+            return HydrogenDisplayType.Smart;
+        }
+      }
+  }
+
+  private int calcValence(IAtomContainer mol, IAtom atom) {
+    int v = atom.getImplicitHydrogenCount();
+    for (IBond bond : mol.getConnectedBondsList(atom)) {
+        IBond.Order order = bond.getOrder();
+        if (order != null && order != IBond.Order.UNSET)
+          v += order.numeric();
+    }
+    return v;
+  }
+
+  private void perceiveRadicals(IAtomContainer mol) {
+    for (IAtom atom : mol.atoms()) {
+      int v;
+      Integer q = atom.getFormalCharge();
+      if (q == null) q = 0;
+      switch (atom.getAtomicNumber()) {
+        case 6:
+          if (q == 0) {
+            v = calcValence(mol, atom);
+            if (v == 2)
+              mol.addSingleElectron(mol.indexOf(atom));
+            if (v < 4)
+              mol.addSingleElectron(mol.indexOf(atom));
+          }
+          break;
+        case 7:
+          if (q == 0) {
+            v = calcValence(mol, atom);
+            if (v < 3)
+              mol.addSingleElectron(mol.indexOf(atom));
+          }
+          break;
+        case 8:
+          if (q == 0) {
+            v = calcValence(mol, atom);
+            if (v < 2)
+              mol.addSingleElectron(mol.indexOf(atom));
+            if (v < 1)
+              mol.addSingleElectron(mol.indexOf(atom));
+          }
+          break;
+      }
+    }
+  }
+
   /**
    * Restful entry point.
    *
    * @param smi      SMILES to depict
    * @param fmt      output format
    * @param style    preset style COW (Color-on-white), COB, BOW, COW
-   * @param anon     rendering anonymised graphs
-   * @param zoom     zoom factor (1=100%=none)
-   * @param annotate annotations to add
-   * @param w        width of the image
-   * @param h        height of the image
-   * @param sma      highlight SMARTS pattern
    * @return the depicted structure
    * @throws CDKException something not okay with input
    * @throws IOException  problem reading/writing request
@@ -131,64 +287,32 @@ public class DepictController {
   public HttpEntity<?> depict(@RequestParam("smi") String smi,
                               @PathVariable("fmt") String fmt,
                               @PathVariable("style") String style,
-                              @RequestParam(value = "suppressh", defaultValue = "true") String suppressh,
-                              @RequestParam(value = "hdisp", defaultValue = "bridgehead") String hDisplayParam,
-                              @RequestParam(value = "anon", defaultValue = "off") String anon,
-                              @RequestParam(value = "zoom", defaultValue = "1.3") double zoom,
-                              @RequestParam(value = "annotate", defaultValue = "none") String annotate,
-                              @RequestParam(value = "w", defaultValue = "-1") int w,
-                              @RequestParam(value = "h", defaultValue = "-1") int h,
-                              @RequestParam(value = "abbr", defaultValue = "reagents") String abbr,
-                              @RequestParam(value = "sma", defaultValue = "") String sma,
-                              @RequestParam(value = "showtitle", defaultValue = "false") boolean showTitle,
-                              @RequestParam(value = "smalim", defaultValue = "100") int smaLimit,
-                              @RequestParam(value = "alignrxnmap", defaultValue = "true") boolean alignRxnMap,
-                              @RequestParam Map<String,String> params) throws
+                              @RequestParam Map<String,String> extra) throws
           CDKException,
           IOException
   {
 
-    // backwards compatibility
-    HydrogenDisplayType hDisplayType = HydrogenDisplayType.Minimal;
-    if ("false".equalsIgnoreCase(suppressh) || "f".equalsIgnoreCase(suppressh)) {
-      hDisplayType = HydrogenDisplayType.Provided;
-    } else {
-      if (hDisplayParam != null) {
-        switch (hDisplayParam.toLowerCase()) {
-          case "suppressed":
-            hDisplayType = HydrogenDisplayType.Minimal;
-            break;
-          case "provided":
-            hDisplayType = HydrogenDisplayType.Provided;
-            break;
-          case "stereo":
-            hDisplayType = HydrogenDisplayType.StereoOnly;
-            break;
-          case "bridgeheadtetrahedral":
-          case "bridgehead":
-          case "default":
-          case "smart":
-            hDisplayType = HydrogenDisplayType.BridgeHeadTetrahedralOnly;
-            break;
-        }
-      }
-    }
+    String abbr = getString(Param.ABBREVIATE, extra);
+    String annotate = getString(Param.ANNOTATE, extra);
+
+    HydrogenDisplayType hDisplayType = getHydrogenDisplay(extra);
 
     // Note: DepictionGenerator is immutable
-    DepictionGenerator myGenerator = generator.withSize(w, h)
-                                              .withZoom(zoom);
+    DepictionGenerator myGenerator = generator.withSize(getDouble(Param.WIDTH, extra),
+                                                        getDouble(Param.HEIGHT, extra))
+                                              .withZoom(getDouble(Param.ZOOM, extra));
 
     // Configure style preset
     myGenerator = withStyle(myGenerator, style);
-
+    myGenerator = withBgFgColors(extra, myGenerator);
     myGenerator = myGenerator.withAnnotationScale(0.7)
                              .withAnnotationColor(Color.RED);
 
     // align rxn maps
-    myGenerator = myGenerator.withMappedRxnAlign(alignRxnMap);
+    myGenerator = myGenerator.withMappedRxnAlign(getBoolean(Param.ALIGNRXNMAP, extra));
 
     // Improved depiction of anatomised graphs, e.g. ***1*****1**
-    if (anon.equalsIgnoreCase("on")) {
+    if (getBoolean(Param.ANON, extra)) {
       myGenerator = myGenerator.withParam(Visibility.class,
                                           new SymbolVisibility() {
                                             @Override
@@ -210,19 +334,32 @@ public class DepictController {
 
     if (isRxn) {
       rxn = smipar.parseReactionSmiles(smi);
-      for (IAtomContainer component : rxn.getReactants().atomContainers())
+      for (IAtomContainer component : rxn.getReactants().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-      for (IAtomContainer component : rxn.getProducts().atomContainers())
+        perceiveRadicals(component);
+      }
+      for (IAtomContainer component : rxn.getProducts().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-      for (IAtomContainer component : rxn.getAgents().atomContainers())
+        perceiveRadicals(component);
+      }
+      for (IAtomContainer component : rxn.getAgents().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-      highlight = findHits(sma, rxn, mol, smaLimit);
+        perceiveRadicals(component);
+      }
+      highlight = findHits(getString(Param.SMARTSQUERY, extra),
+                           rxn,
+                           mol,
+                           getInt(Param.SMARTSHITLIM, extra));
       abbreviate(rxn, abbr, annotate);
     } else {
       mol = loadMol(smi);
       setHydrogenDisplay(mol, hDisplayType);
-      highlight = findHits(sma, rxn, mol, smaLimit);
+      highlight = findHits(getString(Param.SMARTSQUERY, extra),
+                           rxn,
+                           mol,
+                           getInt(Param.SMARTSHITLIM, extra));
       abbreviate(mol, abbr, annotate);
+      perceiveRadicals(mol);
     }
 
     // Add annotations
@@ -265,6 +402,7 @@ public class DepictController {
         break;
       case "bow":
       case "wob":
+      case "bot":
         myGenerator = myGenerator.withHighlight(highlight,
                                                 new Color(0xff0000));
         break;
@@ -275,22 +413,24 @@ public class DepictController {
     }
 
 
-    if (showTitle) {
+    if (getBoolean(Param.SHOWTITLE, extra)) {
       if (isRxn)
         myGenerator = myGenerator.withRxnTitle();
       else
         myGenerator = myGenerator.withMolTitle();
     }
 
+    final String fmtlc = fmt.toLowerCase(Locale.ROOT);
+
     // pre-render the depiction
     final Depiction depiction = isRxn ? myGenerator.depict(rxn)
             : isRgp ? myGenerator.depict(mols, mols.size(), 1)
             : myGenerator.depict(mol);
 
-    final String fmtlc = fmt.toLowerCase(Locale.ROOT);
     switch (fmtlc) {
       case Depiction.SVG_FMT:
-        return makeResponse(depiction.toSvgStr().getBytes(), "image/svg+xml");
+        return makeResponse(depiction.toSvgStr(getString(Param.SVGUNITS, extra))
+                                     .getBytes(), "image/svg+xml");
       case Depiction.PDF_FMT:
         return makeResponse(depiction.toPdfStr().getBytes(), "application/pdf");
       case Depiction.PNG_FMT:
@@ -304,18 +444,55 @@ public class DepictController {
     throw new IllegalArgumentException("Unsupported format.");
   }
 
+  private DepictionGenerator withBgFgColors(
+          @RequestParam Map<String, String> extra,
+          DepictionGenerator myGenerator) {
+    final String bgcolor = getString(Param.BGCOLOR, extra);
+    switch (bgcolor) {
+      case "clear":
+      case "transparent":
+      case "null":
+        myGenerator = myGenerator.withBackgroundColor(new Color(0, 0, 0, 0));
+        break;
+      case "default":
+        // do nothing
+        break;
+      default:
+        myGenerator = myGenerator.withBackgroundColor(getColor(bgcolor));
+        break;
+    }
+
+    final String fgcolor = getString(Param.FGCOLOR, extra);
+    switch (fgcolor) {
+      case "cpk":
+      case "cdk":
+        myGenerator = myGenerator.withAtomColors(new CDK2DAtomColors());
+        break;
+      case "default":
+        // do nothing
+        break;
+      default:
+        myGenerator = myGenerator.withAtomColors(new UniColor(getColor(fgcolor)));
+        break;
+    }
+    return myGenerator;
+  }
+
   private void annotateCip(IAtomContainer part)
   {
     CdkLabeller.label(part);
     for (IAtom atom : part.atoms()) {
-      if (atom.getProperty("cip.label") != null)
+      if (atom.getProperty(BaseMol.CONF_INDEX) != null)
         atom.setProperty(StandardGenerator.ANNOTATION_LABEL,
-                         StandardGenerator.ITALIC_DISPLAY_PREFIX + atom.getProperty("cip.label"));
+                         StandardGenerator.ITALIC_DISPLAY_PREFIX + atom.getProperty(BaseMol.CONF_INDEX));
+      else if (atom.getProperty(BaseMol.CIP_LABEL_KEY) != null)
+        atom.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                         StandardGenerator.ITALIC_DISPLAY_PREFIX + atom.getProperty(BaseMol.CIP_LABEL_KEY));
     }
     for (IBond bond : part.bonds()) {
-      if (bond.getProperty("cip.label") != null)
+      if (bond.getProperty(BaseMol.CIP_LABEL_KEY) != null)
         bond.setProperty(StandardGenerator.ANNOTATION_LABEL,
-                         StandardGenerator.ITALIC_DISPLAY_PREFIX + bond.getProperty("cip.label"));
+                         StandardGenerator.ITALIC_DISPLAY_PREFIX + bond.getProperty(BaseMol.CIP_LABEL_KEY));
     }
   }
 
@@ -325,7 +502,7 @@ public class DepictController {
       case Minimal:
         AtomContainerManipulator.suppressHydrogens(mol);
         break;
-      case StereoOnly: {
+      case Stereo: {
         AtomContainerManipulator.suppressHydrogens(mol);
         List<IStereoElement> ses = new ArrayList<>();
         for (IStereoElement se : mol.stereoElements()) {
@@ -336,6 +513,7 @@ public class DepictController {
                 focus.setImplicitHydrogenCount(0);
                 IAtom          hydrogen = sproutHydrogen(mol, focus);
                 IStereoElement tmp      = se.map(Collections.singletonMap(focus, hydrogen));
+                // need to keep focus same
                 ses.add(new TetrahedralChirality(focus,
                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
                                                  tmp.getConfig()));
@@ -368,9 +546,9 @@ public class DepictController {
         mol.setStereoElements(ses);
       }
       break;
-      case BridgeHeadTetrahedralOnly: {
-        Cycles.markRingAtomsAndBonds(mol);
+      case Smart: {
         AtomContainerManipulator.suppressHydrogens(mol);
+        Cycles.markRingAtomsAndBonds(mol);
         List<IStereoElement> ses = new ArrayList<>();
         for (IStereoElement se : mol.stereoElements()) {
           switch (se.getConfigClass()) {
@@ -381,10 +559,69 @@ public class DepictController {
                 focus.setImplicitHydrogenCount(0);
                 IAtom          hydrogen = sproutHydrogen(mol, focus);
                 IStereoElement tmp      = se.map(Collections.singletonMap(focus, hydrogen));
+                // need to keep focus same
                 ses.add(new TetrahedralChirality(focus,
                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
                                                  tmp.getConfig()));
               } else {
+                ses.add(se);
+              }
+            }
+            break;
+            case IStereoElement.CisTrans: {
+              IBond focus = (IBond) se.getFocus();
+              IAtom begin = focus.getBegin();
+              IAtom end   = focus.getEnd();
+              IAtom hydrogenBegin = null;
+              IAtom hydrogenEnd = null;
+
+              if (begin.getImplicitHydrogenCount() == 1 &&
+                  shouldAddH(mol, begin, mol.getConnectedBondsList(begin))) {
+                begin.setImplicitHydrogenCount(0);
+                hydrogenBegin = sproutHydrogen(mol, begin);
+              }
+
+              if (end.getImplicitHydrogenCount() == 1 &&
+                  shouldAddH(mol, end, mol.getConnectedBondsList(end))) {
+                end.setImplicitHydrogenCount(0);
+                hydrogenEnd = sproutHydrogen(mol, end);
+              }
+
+              if (hydrogenBegin != null || hydrogenEnd != null) {
+                Map<IAtom,IAtom> map = new HashMap<>();
+                map.put(begin, hydrogenBegin);
+                map.put(end, hydrogenEnd);
+                ses.add(se.map(map));
+              }
+              else {
+                ses.add(se);
+              }
+            }
+            break;
+            case IStereoElement.Allenal: {
+              IAtom focus = (IAtom) se.getFocus();
+              IAtom[] terminals = ExtendedTetrahedral.findTerminalAtoms(mol, focus);
+              IAtom  hydrogen1 = null;
+              IAtom  hydrogen2 = null;
+              if (terminals[0].getImplicitHydrogenCount() == 1) {
+                terminals[0].setImplicitHydrogenCount(0);
+                hydrogen1 = sproutHydrogen(mol, terminals[0]);
+              }
+              if (terminals[1].getImplicitHydrogenCount() == 1) {
+                terminals[1].setImplicitHydrogenCount(0);
+                hydrogen2 = sproutHydrogen(mol, terminals[1]);
+              }
+              if (hydrogen1 != null || hydrogen2 != null) {
+                Map<IAtom,IAtom> map = new HashMap<>();
+                if (hydrogen1 != null)
+                  map.put(terminals[0], hydrogen1);
+                if (hydrogen2 != null)
+                  map.put(terminals[1], hydrogen2);
+                // find as focus is not one of the terminals
+                IStereoElement<IAtom,IAtom> tmp = se.map(map);
+                ses.add(tmp);
+              }
+              else {
                 ses.add(se);
               }
             }
@@ -406,10 +643,10 @@ public class DepictController {
   private boolean shouldAddH(IAtomContainer mol, IAtom atom, Iterable<IBond> bonds) {
     int count = 0;
     for (IBond bond : bonds) {
+      IAtom nbr = bond.getOther(atom);
       if (bond.isInRing()) {
         ++count;
       } else {
-        IAtom nbr = bond.getOther(atom);
         for (IStereoElement se : mol.stereoElements()) {
           if (se.getConfigClass() == IStereoElement.TH &&
                   se.getFocus().equals(nbr)) {
@@ -417,6 +654,10 @@ public class DepictController {
           }
         }
       }
+      // hydrogen isotope
+      if (nbr.getAtomicNumber() == 1 &&
+          nbr.getMassNumber() != null)
+        return true;
     }
     return count == 3;
   }
@@ -429,7 +670,7 @@ public class DepictController {
     hydrogen.setImplicitHydrogenCount(0);
     mol.addAtom(hydrogen);
     mol.addBond(mol.indexOf(focus), mol.getAtomCount() - 1, IBond.Order.SINGLE);
-    return hydrogen;
+    return mol.getAtom(mol.getAtomCount()-1);
   }
 
   private void contractHydrates(IAtomContainer mol)
@@ -636,7 +877,8 @@ public class DepictController {
    * @param style     style type
    * @return configured depiction generator
    */
-  private static DepictionGenerator withStyle(DepictionGenerator generator, String style)
+  private static DepictionGenerator withStyle(DepictionGenerator generator,
+                                              String style)
   {
     switch (style) {
       case "cow":
