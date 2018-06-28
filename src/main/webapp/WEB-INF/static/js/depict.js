@@ -40,11 +40,6 @@ function update() {
 
 function depict_url(opts, smiles, w, h) {
 	var smi = encodeURIComponent(smiles);
-	// okay to not encode these
-	smi = smi.replace(/%3D/g, '=');
-	smi = smi.replace(/%5B/g, '[');
-	smi = smi.replace(/%5D/g, ']');
-	smi = smi.replace(/%40/g, '@');
 	var url = './depict/' + opts.style + '/svg?smi=' + smi;
 	if (w && h)
 	  url += '&w=' + w + '&h=' + h;
