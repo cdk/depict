@@ -66,6 +66,12 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
         <option value="bridgehead" selected>Chiral Hydrogens (smart)</option>
         <option value="provided">Default Hydrogens</option>
       </select>
+      <select name="abbr" onchange="update()">
+        <option value="on" selected>Abbreviate Reagents and Groups</option>
+        <option value="reagents">Abbreviate Reagents</option>
+        <option value="groups">Abbreviate Groups</option>
+        <option value="off">Do Not Abbreviate</option>
+      </select>
       <i title="More Options"
          onclick="toggleExtraOpts();"
          class="fas fa-cog depict_icon_button"></i>
@@ -76,18 +82,7 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
     </div>
     <div id="depict_extra_opts">
         <table class="grid" style="text-align: left;">
-            <tr>
-                <th>Abbreviate</th>
-                <td>
-                    <select name="abbr" onchange="update()">
-                        <option value="on" selected>Reagents and Groups</option>
-                        <option value="reagents">Reagents</option>
-                        <option value="groups">Groups</option>
-                        <option value="off">None</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
+           <tr>
                 <th>Zoom</th>
                 <td>
                     <input onchange="update()" name="zoom" type="range" min="10" max="500" step="5" value="160">
