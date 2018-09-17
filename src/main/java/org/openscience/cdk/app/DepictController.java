@@ -88,6 +88,31 @@ import java.util.concurrent.Executors;
 @Controller
 public class DepictController {
 
+  private Color[] COLORS = new Color[]{
+      new Color(0xe6194b),
+      new Color(0x3cb44b),
+      new Color(0xffe119),
+      new Color(0x0082c8),
+      new Color(0xf58231),
+      new Color(0x911eb4),
+      new Color(0x46f0f0),
+      new Color(0xf032e6),
+      new Color(0xd2f53c),
+      new Color(0xfabebe),
+      new Color(0x008080),
+      new Color(0xe6beff),
+      new Color(0xaa6e28),
+      new Color(0xfffac8),
+      new Color(0x800000),
+      new Color(0xaaffc3),
+      new Color(0x808000),
+      new Color(0xffd8b1),
+      new Color(0x000080),
+      new Color(0x808080),
+      new Color(0xE3E3E3),
+      new Color(0x000000)
+  };
+
   private final ExecutorService smartsExecutor = Executors.newFixedThreadPool(4);
 
   // chem object builder to create objects with
@@ -375,13 +400,24 @@ public class DepictController {
         myGenerator = myGenerator.withAtomValues();
         break;
       case "colmap":
-        myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
-                new Color(185, 255, 180),
-                new Color(255, 162, 162),
-                new Color(253, 139, 255),
-                new Color(255, 206, 86),
-                new Color(227, 227, 227)})
-                                 .withOuterGlowHighlight(6d);
+        if (isRxn) {
+          myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
+              new Color(185, 255, 180),
+              new Color(255, 162, 162),
+              new Color(253, 139, 255),
+              new Color(255, 206, 86),
+              new Color(227, 227, 227)})
+                                   .withOuterGlowHighlight(6d);
+        } else {
+          myGenerator = myGenerator.withOuterGlowHighlight();
+          myGenerator = myGenerator.withParam(StandardGenerator.Visibility.class,
+                                              SymbolVisibility.iupacRecommendationsWithoutTerminalCarbon());
+          for (IAtom atom : mol.atoms()) {
+            Integer mapidx = atom.getProperty(CDKConstants.ATOM_ATOM_MAPPING);
+            if (mapidx != null && mapidx < COLORS.length)
+              atom.setProperty(StandardGenerator.HIGHLIGHT_COLOR, COLORS[mapidx]);
+          }
+        }
         break;
       case "cip":
         if (isRxn) {
