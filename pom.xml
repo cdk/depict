@@ -5,16 +5,26 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openscience.cdk</groupId>
   <artifactId>cdkdepict</artifactId>
-  <version>1.0</version>
+  <version>1.2-SNAPSHOT</version>
   <modules>
     <module>cdkdepict-lib</module>
     <module>cdkdepict-webapp</module>
   </modules>
   <packaging>pom</packaging>
+  <name>cdkdepict</name>
+  <description>SMILES depiction WebApp</description>
+  <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.2-SNAPSHOT</cdk.version>
+    <cdk.version>2.2</cdk.version>
   </properties>
+  <developers>
+    <developer>
+      <name>John Mayfield</name>
+      <url>http://www.github.com/johnmay/</url>
+      <timezone>GMT</timezone>
+    </developer>
+  </developers>
   <licenses>
     <license>
       <name>GNU LGPL 2.1 or later</name>
