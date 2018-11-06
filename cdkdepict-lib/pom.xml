@@ -36,6 +36,20 @@
       <groupId>com.simolecule.centres</groupId>
       <artifactId>centres-cdk</artifactId>
       <version>1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-atomtype</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-standard</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-io</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 </project>
