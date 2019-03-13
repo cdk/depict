@@ -875,7 +875,7 @@ public class DepictController {
     String      subtype = contentType.substring(contentType.indexOf('/') + 1, contentType.length());
     header.setContentType(new MediaType(type, subtype));
     header.add("Access-Control-Allow-Origin", "*");
-    header.set(HttpHeaders.CACHE_CONTROL, "max-age=31536000");
+    header.set(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000");
     header.setContentLength(bytes.length);
     return new HttpEntity<>(bytes, header);
   }
