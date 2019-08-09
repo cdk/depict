@@ -145,6 +145,7 @@ O=[N+]([O-])O HNO3
 N#N N2
 O=C(N=NC(=O)OCC)OCC DEAD
 Cl[Sn]Cl SnCl2
+[Sn+2].[Cl-].[Cl-] SnCl2
 [Cl-].[NH4+] NH4Cl
 [AlH](CC(C)C)CC(C)C DiBAlH
 BrCC=1C=CC=CC1 BnBr
@@ -181,6 +182,7 @@ O=C=O CO2
 F[P-](F)(F)(F)(F)F.N1=NN(O[P+](N2CCCC2)(N3CCCC3)N4CCCC4)C=5C=CC=CC15 PyBop
 [N-]=[N+]=NP(=O)(C=1C=CC=CC1)C=2C=CC=CC2 DPPA
 [K+].[C-]#N KCN
+[K]C#N KCN
 O=C(Cl)C MeCOCl
 O=[Os](=O)(=O)=O OsO4
 [F-].[K+] KF
@@ -289,7 +291,9 @@ O=[Os](=O)(=O)=O OsO4
 [Na+].[Na+].O=C([O-])[O-] Na2CO3
 O=C([O-])[O-].[Cs+].[Cs+] Cs2CO3
 [NH4+].[Cl-] NH4Cl
+[NH4]Cl NH4Cl
 [Na+].[BH4-] NaBH4
+[Na][BH4] NaBH4
 CN(C)C(=[N+](C)C)ON1N=NC2=C1N=CC=C2.F[P-](F)(F)(F)(F)F HATU
 [K+].[OH-] KOH
 [Na+].CC(=O)O[BH-](OC(=O)C)OC(=O)C NaBH(OAc)3

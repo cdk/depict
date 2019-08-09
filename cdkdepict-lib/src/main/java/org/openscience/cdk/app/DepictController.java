@@ -22,6 +22,7 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IStereoElement;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
@@ -34,6 +35,8 @@ import org.openscience.cdk.sgroup.SgroupKey;
 import org.openscience.cdk.sgroup.SgroupType;
 import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
@@ -70,6 +73,8 @@ import java.util.concurrent.Executors;
  */
 @Controller
 public class DepictController {
+
+  private final Object lock = new Object();
 
   private Color[] COLORS = new Color[]{
       new Color(0xe6194b),
@@ -227,51 +232,6 @@ public class DepictController {
       }
   }
 
-  private int calcValence(IAtomContainer mol, IAtom atom) {
-    int v = atom.getImplicitHydrogenCount();
-    for (IBond bond : mol.getConnectedBondsList(atom)) {
-        IBond.Order order = bond.getOrder();
-        if (order != null && order != IBond.Order.UNSET)
-          v += order.numeric();
-    }
-    return v;
-  }
-
-  private void perceiveRadicals(IAtomContainer mol) {
-    for (IAtom atom : mol.atoms()) {
-      int v;
-      Integer q = atom.getFormalCharge();
-      if (q == null) q = 0;
-      switch (atom.getAtomicNumber()) {
-        case 6:
-          if (q == 0) {
-            v = calcValence(mol, atom);
-            if (v == 2)
-              mol.addSingleElectron(mol.indexOf(atom));
-            if (v < 4)
-              mol.addSingleElectron(mol.indexOf(atom));
-          }
-          break;
-        case 7:
-          if (q == 0) {
-            v = calcValence(mol, atom);
-            if (v < 3)
-              mol.addSingleElectron(mol.indexOf(atom));
-          }
-          break;
-        case 8:
-          if (q == 0) {
-            v = calcValence(mol, atom);
-            if (v < 2)
-              mol.addSingleElectron(mol.indexOf(atom));
-            if (v < 1)
-              mol.addSingleElectron(mol.indexOf(atom));
-          }
-          break;
-      }
-    }
-  }
-
   /**
    * Restful entry point.
    *
@@ -335,15 +295,18 @@ public class DepictController {
       rxn = smipar.parseReactionSmiles(smi);
       for (IAtomContainer component : rxn.getReactants().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-        perceiveRadicals(component);
+        MolOp.perceiveRadicals(component);
+        MolOp.perceiveDativeBonds(component);
       }
       for (IAtomContainer component : rxn.getProducts().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-        perceiveRadicals(component);
+        MolOp.perceiveRadicals(component);
+        MolOp.perceiveDativeBonds(component);
       }
       for (IAtomContainer component : rxn.getAgents().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
-        perceiveRadicals(component);
+        MolOp.perceiveRadicals(component);
+        MolOp.perceiveDativeBonds(component);
       }
       highlight = findHits(getString(Param.SMARTSQUERY, extra),
                            rxn,
@@ -358,7 +321,9 @@ public class DepictController {
                            mol,
                            getInt(Param.SMARTSHITLIM, extra));
       abbreviate(mol, abbr, annotate);
-      perceiveRadicals(mol);
+      MolOp.perceiveRadicals(mol);
+      MolOp.perceiveDativeBonds(mol);
+      new StructureDiagramGenerator().generateCoordinates(mol);
     }
 
     // Add annotations
@@ -875,7 +840,7 @@ public class DepictController {
     String      subtype = contentType.substring(contentType.indexOf('/') + 1, contentType.length());
     header.setContentType(new MediaType(type, subtype));
     header.add("Access-Control-Allow-Origin", "*");
-    header.set(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000");
+    // header.set(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000");
     header.setContentLength(bytes.length);
     return new HttpEntity<>(bytes, header);
   }
