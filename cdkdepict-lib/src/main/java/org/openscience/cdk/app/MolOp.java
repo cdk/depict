@@ -13,12 +13,6 @@ import org.openscience.cdk.interfaces.IBond;
 
 public class MolOp {
 
-  private static boolean isTransitionMetal(IAtom a) {
-    // Transition metals only?
-    return Elements.isMetal(a);
-  }
-
-
   private static int calcValence(IAtom atom) {
     int v = atom.getImplicitHydrogenCount();
     for (IBond bond : atom.bonds()) {
@@ -30,13 +24,56 @@ public class MolOp {
   }
 
 
-  private static boolean isHypervalent(IAtom a) {
+  private static boolean isDativeDonor(IAtom a) {
     switch (a.getAtomicNumber()) {
       case 7:
       case 15:
         return a.getFormalCharge() == 0 && calcValence(a) == 4;
       case 8:
         return a.getFormalCharge() == 0 && calcValence(a) == 3;
+      default:
+        return false;
+    }
+  }
+
+
+  private static boolean isDativeAcceptor(IAtom a) {
+    if (Elements.isMetal(a))
+      return true;
+    switch (a.getAtomicNumber()) {
+      case 5:
+        return a.getFormalCharge() == 0 && calcValence(a) == 4;
+      case 8:
+        return a.getFormalCharge() == 0 && calcValence(a) == 1;
+      default:
+        return false;
+    }
+  }
+
+
+  private static boolean isChargedDativeDonor(IAtom a) {
+    switch (a.getAtomicNumber()) {
+      case 7:
+      case 15:
+        return a.getFormalCharge() == +1 && calcValence(a) == 4;
+      case 8:
+        return a.getFormalCharge() == +1 && calcValence(a) == 3;
+      default:
+        return false;
+    }
+  }
+
+
+  private static boolean isChargedDativeAcceptor(IAtom a) {
+    if (a.getFormalCharge() != -1)
+      return false;
+    if (Elements.isMetal(a))
+      return true;
+    switch (a.getAtomicNumber()) {
+      case 5:
+        return calcValence(a) == 4;
+      case 8:
+        return calcValence(a) == 1;
       default:
         return false;
     }
@@ -83,13 +120,27 @@ public class MolOp {
     for (IBond bond : mol.bonds()) {
       IAtom beg = bond.getBegin();
       IAtom end = bond.getEnd();
-
-      if (isTransitionMetal(beg) && isHypervalent(end)) {
+      if (isDativeDonor(end) && isDativeAcceptor(beg)) {
         bond.setDisplay(IBond.Display.ArrowBeg);
         //bond.setOrder(IBond.Order.UNSET);
-      } else if (isTransitionMetal(end) && isHypervalent(beg)) {
+      } else if (isDativeDonor(beg) && isDativeAcceptor(end)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
         //bond.setOrder(IBond.Order.UNSET);
+      } else if (isChargedDativeDonor(end) && isChargedDativeAcceptor(beg)) {
+        bond.setDisplay(IBond.Display.ArrowBeg);
+        //bond.setOrder(IBond.Order.UNSET);
+      } else if (isChargedDativeDonor(beg) && isChargedDativeAcceptor(end)) {
+        bond.setDisplay(IBond.Display.ArrowEnd);
+        //bond.setOrder(IBond.Order.UNSET);
+      }
+    }
+    for (IBond bond : mol.bonds()) {
+      IAtom beg = bond.getBegin();
+      IAtom end = bond.getEnd();
+      if (bond.getDisplay() == IBond.Display.ArrowBeg ||
+          bond.getDisplay() == IBond.Display.ArrowEnd) {
+        beg.setFormalCharge(0);
+        end.setFormalCharge(0);
       }
     }
   }
