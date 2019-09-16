@@ -79,6 +79,10 @@ CC(C)(C)OC(*)=O Boc
 *N=[N+]=[N-] N3
 *C#N CN
 *C(F)(F)F CF3
+*C(F)(F)C(F)(F)F C2F5
+*C(F)(F)C(F)(F)C(F)(F)F C3F7
+*C(F)(F)C(F)(F)C(F)(F)C(F)(F)F C4F9
+*C(F)(F)C(F)(F)C(F)(F)C(F)(F)C(F)(F)F C5F11
 *C(F)(F) CHF2
 *C=O CHO
 *[Si](C)(C)C(C)(C)C TBS
