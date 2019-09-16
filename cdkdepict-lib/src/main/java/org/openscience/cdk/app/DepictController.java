@@ -878,6 +878,10 @@ public class DepictController {
         generator = generator.withAtomColors(new UniColor(Color.WHITE))
                              .withBackgroundColor(Color.BLACK);
         break;
+      case "wot":
+        generator = generator.withAtomColors(new UniColor(Color.WHITE))
+                             .withBackgroundColor(new Color(0,0,0,0));
+        break;
       case "cob":
         generator = generator.withAtomColors(new CobColorer())
                              .withBackgroundColor(Color.BLACK)
