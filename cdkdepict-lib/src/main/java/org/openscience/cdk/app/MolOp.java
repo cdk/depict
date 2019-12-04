@@ -14,7 +14,8 @@ import org.openscience.cdk.interfaces.IBond;
 public class MolOp {
 
   private static int calcValence(IAtom atom) {
-    int v = atom.getImplicitHydrogenCount();
+    Integer impHs = atom.getImplicitHydrogenCount();
+    int v = impHs == null ? 0 : impHs;
     for (IBond bond : atom.bonds()) {
       IBond.Order order = bond.getOrder();
       if (order != null && order != IBond.Order.UNSET)
