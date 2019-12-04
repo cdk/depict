@@ -33,7 +33,6 @@ import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibi
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupKey;
 import org.openscience.cdk.sgroup.SgroupType;
-import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
@@ -818,7 +817,7 @@ public class DepictController {
   {
     if (str.contains("V2000")) {
       try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
-        return mdlr.read(new AtomContainer(0, 0, 0, 0));
+        return mdlr.read(builder.newAtomContainer());
       } catch (CDKException | IOException e3) {
         throw new CDKException("Could not parse input");
       }
