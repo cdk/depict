@@ -14,8 +14,7 @@ import org.openscience.cdk.interfaces.IBond;
 public class MolOp {
 
   private static int calcValence(IAtom atom) {
-    Integer impHs = atom.getImplicitHydrogenCount();
-    int v = impHs == null ? 0 : impHs;
+    int v = atom.getImplicitHydrogenCount();
     for (IBond bond : atom.bonds()) {
       IBond.Order order = bond.getOrder();
       if (order != null && order != IBond.Order.UNSET)
@@ -52,7 +51,7 @@ public class MolOp {
   }
 
 
-  private static boolean isChargedDativeDonor(IAtom a) {
+  private static boolean isPosDativeDonor(IAtom a) {
     switch (a.getAtomicNumber()) {
       case 7:
       case 15:
@@ -65,7 +64,7 @@ public class MolOp {
   }
 
 
-  private static boolean isChargedDativeAcceptor(IAtom a) {
+  private static boolean isNegDativeAcceptor(IAtom a) {
     if (a.getFormalCharge() != -1)
       return false;
     if (Elements.isMetal(a))
@@ -123,25 +122,16 @@ public class MolOp {
       IAtom end = bond.getEnd();
       if (isDativeDonor(end) && isDativeAcceptor(beg)) {
         bond.setDisplay(IBond.Display.ArrowBeg);
-        //bond.setOrder(IBond.Order.UNSET);
       } else if (isDativeDonor(beg) && isDativeAcceptor(end)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
-        //bond.setOrder(IBond.Order.UNSET);
-      } else if (isChargedDativeDonor(end) && isChargedDativeAcceptor(beg)) {
+      } else if (isPosDativeDonor(end) && isNegDativeAcceptor(beg)) {
         bond.setDisplay(IBond.Display.ArrowBeg);
-        //bond.setOrder(IBond.Order.UNSET);
-      } else if (isChargedDativeDonor(beg) && isChargedDativeAcceptor(end)) {
+        beg.setFormalCharge(beg.getFormalCharge()+1);
+        end.setFormalCharge(end.getFormalCharge()-1);
+      } else if (isPosDativeDonor(beg) && isNegDativeAcceptor(end)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
-        //bond.setOrder(IBond.Order.UNSET);
-      }
-    }
-    for (IBond bond : mol.bonds()) {
-      IAtom beg = bond.getBegin();
-      IAtom end = bond.getEnd();
-      if (bond.getDisplay() == IBond.Display.ArrowBeg ||
-          bond.getDisplay() == IBond.Display.ArrowEnd) {
-        beg.setFormalCharge(0);
-        end.setFormalCharge(0);
+        beg.setFormalCharge(beg.getFormalCharge()+1);
+        end.setFormalCharge(end.getFormalCharge()-1);
       }
     }
   }
