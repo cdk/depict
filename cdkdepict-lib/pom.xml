@@ -38,6 +38,11 @@
       <version>${cdk.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-silent</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.simolecule.centres</groupId>
       <artifactId>centres-cdk</artifactId>
       <version>1.0</version>
@@ -53,6 +58,22 @@
         <exclusion>
           <groupId>org.openscience.cdk</groupId>
           <artifactId>cdk-io</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-ioformats</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-isomorhism</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-smiles</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openscience.cdk</groupId>
+          <artifactId>cdk-silent</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
