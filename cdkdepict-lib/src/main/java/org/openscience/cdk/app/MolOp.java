@@ -130,8 +130,8 @@ public class MolOp {
         end.setFormalCharge(end.getFormalCharge()-1);
       } else if (isPosDativeDonor(beg) && isNegDativeAcceptor(end)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
-        beg.setFormalCharge(beg.getFormalCharge()+1);
-        end.setFormalCharge(end.getFormalCharge()-1);
+        beg.setFormalCharge(beg.getFormalCharge()-1);
+        end.setFormalCharge(end.getFormalCharge()+1);
       }
     }
   }
