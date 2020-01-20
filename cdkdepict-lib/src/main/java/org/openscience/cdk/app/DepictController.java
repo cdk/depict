@@ -33,9 +33,8 @@ import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibi
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupKey;
 import org.openscience.cdk.sgroup.SgroupType;
+import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
-import org.openscience.cdk.smiles.SmiFlavor;
-import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
@@ -142,8 +141,10 @@ public class DepictController {
 
   public DepictController() throws IOException
   {
-    int count = this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
+    this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
+    this.abbreviations.loadFromFile("/org/openscience/cdk/app/reagents.smi");
     this.reagents.loadFromFile("/org/openscience/cdk/app/reagents.smi");
+    this.reagents.setContractToSingleLabel(true);
     abbreviations.setContractOnHetero(false);
   }
 
@@ -292,6 +293,11 @@ public class DepictController {
 
     if (isRxn) {
       rxn = smipar.parseReactionSmiles(smi);
+      highlight = findHits(getString(Param.SMARTSQUERY, extra),
+                           rxn,
+                           mol,
+                           getInt(Param.SMARTSHITLIM, extra));
+      abbreviate(rxn, abbr, annotate);
       for (IAtomContainer component : rxn.getReactants().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
         MolOp.perceiveRadicals(component);
@@ -307,11 +313,6 @@ public class DepictController {
         MolOp.perceiveRadicals(component);
         MolOp.perceiveDativeBonds(component);
       }
-      highlight = findHits(getString(Param.SMARTSQUERY, extra),
-                           rxn,
-                           mol,
-                           getInt(Param.SMARTSHITLIM, extra));
-      abbreviate(rxn, abbr, annotate);
     } else {
       mol = loadMol(smi);
       setHydrogenDisplay(mol, hDisplayType);
@@ -667,15 +668,34 @@ public class DepictController {
     else
       sgroups = new ArrayList<>(sgroups);
 
-    Sgroup sgrp = new Sgroup();
-    for (IAtom atom : hydrate)
-      sgrp.addAtom(atom);
-    sgrp.putValue(SgroupKey.CtabParentAtomList,
-                  Collections.singleton(hydrate.iterator().next()));
-    sgrp.setType(SgroupType.CtabMultipleGroup);
-    sgrp.setSubscript(Integer.toString(hydrate.size()));
+    if (sgroups.size() == 1 &&
+        sgroups.get(0).getType() == SgroupType.CtabAbbreviation) {
+      Sgroup sgrp = sgroups.get(0);
 
-    sgroups.add(sgrp);
+      boolean okay = true;
+      Set<IAtom> atoms = sgrp.getAtoms();
+      for (IAtom a : hydrate) {
+        if (atoms.contains(a)) {
+          okay = false;
+          break;
+        }
+      }
+
+      if (okay && sgrp.getAtoms().size() + hydrate.size() == mol.getAtomCount()) {
+        for (IAtom a : hydrate)
+          sgrp.addAtom(a);
+        sgrp.setSubscript(sgrp.getSubscript() + '·' + hydrate.size() + "H2O");
+      }
+    } else {
+      Sgroup sgrp = new Sgroup();
+      for (IAtom atom : hydrate)
+        sgrp.addAtom(atom);
+      sgrp.putValue(SgroupKey.CtabParentAtomList,
+                    Collections.singleton(hydrate.iterator().next()));
+      sgrp.setType(SgroupType.CtabMultipleGroup);
+      sgrp.setSubscript(Integer.toString(hydrate.size()));
+      sgroups.add(sgrp);
+    }
   }
 
   private boolean add(Set<IAtom> set, Set<IAtom> atomsToAdd)
@@ -696,41 +716,41 @@ public class DepictController {
       case "on":
       case "yes":
         for (IAtomContainer mol : rxn.getReactants().atomContainers()) {
-          contractHydrates(mol);
           Set<IAtom>   atoms      = new HashSet<>();
           List<Sgroup> newSgroups = new ArrayList<>();
           for (Sgroup sgroup : abbreviations.generate(mol)) {
             if (add(atoms, sgroup.getAtoms()))
               newSgroups.add(sgroup);
           }
+          contractHydrates(mol);
           sgroupmap.putAll(mol, newSgroups);
         }
         for (IAtomContainer mol : rxn.getProducts().atomContainers()) {
-          contractHydrates(mol);
           Set<IAtom>   atoms      = new HashSet<>();
           List<Sgroup> newSgroups = new ArrayList<>();
           for (Sgroup sgroup : abbreviations.generate(mol)) {
             if (add(atoms, sgroup.getAtoms()))
               newSgroups.add(sgroup);
           }
+          contractHydrates(mol);
           sgroupmap.putAll(mol, newSgroups);
         }
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          contractHydrates(mol);
           reagents.apply(mol);
           abbreviations.apply(mol);
+          contractHydrates(mol);
         }
         break;
       case "groups":
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          contractHydrates(mol);
           abbreviations.apply(mol);
+          contractHydrates(mol);
         }
         break;
       case "reagents":
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          contractHydrates(mol);
           reagents.apply(mol);
+          contractHydrates(mol);
         }
         break;
     }
@@ -817,7 +837,7 @@ public class DepictController {
   {
     if (str.contains("V2000")) {
       try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
-        return mdlr.read(builder.newAtomContainer());
+        return mdlr.read(SilentChemObjectBuilder.getInstance().newAtomContainer());
       } catch (CDKException | IOException e3) {
         throw new CDKException("Could not parse input");
       }
