@@ -190,6 +190,7 @@ O=S(=O)=O SO3
 N#CC=1C(=O)C(Cl)=C(Cl)C(=O)C1C#N DDQ
 [Na+].[Na+].O=S([O-])S(=O)[O-] Na2S2O4
 [F-].[Cs+] CsF
+FCs CsF
 C=1C=CC(=C(C1)P(C=2C=CC=CC2C)C=3C=CC=CC3C)C P(oTol)3
 [Na+].[N-]([Si](C)(C)C)[Si](C)(C)C NaN(TMS)2
 [K+].[N-]([Si](C)(C)C)[Si](C)(C)C KN(TMS)2
