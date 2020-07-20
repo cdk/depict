@@ -53,7 +53,10 @@ CC(C)(C)OC(*)=O Boc
 *P(=O)(O)O PO3H2
 *P(=O)([O-])[O-] PO3-2
 *P(=O)([OH])[O-] PO3-
+*OP(=O)([O-])[O-] OPO3-2
+*OP(=O)([OH])[O-] OPO3-
 *S(=O)(=O)[O-] SO3-
+*OS(=O)(=O)[O-] OSO3-
 *OS(=O)(=O)O OSO3H
 *O[S+]([O-])(=O)O OSO3H
 *S(=O)(=O)O SO3H
@@ -64,8 +67,8 @@ CC(C)(C)OC(*)=O Boc
 *CC(C)(C) iBu
 *C(C)C iPr
 *NCCCCC NHAm
-*NCCCC NHPr
-*NCCC NHBu
+*NCCCC NHBu
+*NCCC NHPr
 *NCC NHEt
 *CCCC nBu
 *OCC OEt

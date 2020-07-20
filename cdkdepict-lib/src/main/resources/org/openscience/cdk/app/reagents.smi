@@ -176,6 +176,8 @@ C(=NCC)=NCCCN(C)C EDCI
 O=C=O CO2
 F[P-](F)(F)(F)(F)F.N1=NN(O[P+](N2CCCC2)(N3CCCC3)N4CCCC4)C=5C=CC=CC15 PyBop
 [N-]=[N+]=NP(=O)(C=1C=CC=CC1)C=2C=CC=CC2 DPPA
+c1ccccc1OP(=O)(Oc1ccccc1)N=N#N DPPA
+c1ccccc1OP(=O)(Oc1ccccc1)N=[N+]=[N-] DPPA
 [K+].[C-]#N KCN
 [K]C#N KCN
 O=C(Cl)C MeCOCl
