@@ -61,6 +61,7 @@ CC(C)(C)OC(*)=O Boc
 *O[S+]([O-])(=O)O OSO3H
 *S(=O)(=O)O SO3H
 *[S+]([O-])(=O)O SO3H
+*N(O)C NOHMe
 *S(=O)(=O)C Ms
 *C(C)(C)(C) tBu
 *C(CC)(C) sBu
