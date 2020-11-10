@@ -13,6 +13,7 @@ import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.geometry.GeometryUtil;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Point2d;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -127,6 +129,8 @@ public class DepictController {
     FGCOLOR("fgcolor", "default"),
     SHOWTITLE("showtitle", false),
     ZOOM("zoom", 1.3),
+    ROTATE("r", 0),
+    FLIP("f", false),
     WIDTH("w", -1),
     HEIGHT("h", -1),
     SVGUNITS("svgunits", "mm");
@@ -134,13 +138,12 @@ public class DepictController {
     private final Object defaultValue;
 
     Param(String name, Object defaultValue) {
-      this.name = name;
+      this.name         = name;
       this.defaultValue = defaultValue;
     }
   }
 
-  public DepictController() throws IOException
-  {
+  public DepictController() throws IOException {
     this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
     this.abbreviations.loadFromFile("/org/openscience/cdk/app/reagents.smi");
     this.reagents.loadFromFile("/org/openscience/cdk/app/reagents.smi");
@@ -148,14 +151,14 @@ public class DepictController {
     abbreviations.setContractOnHetero(false);
   }
 
-  private String getString(Param param, Map<String,String> params) {
+  private String getString(Param param, Map<String, String> params) {
     String value = params.get(param.name);
     if (value != null)
       return value;
     return param.defaultValue != null ? param.defaultValue.toString() : "";
   }
 
-  private double getDouble(Param param, Map<String,String> params) {
+  private double getDouble(Param param, Map<String, String> params) {
     String value = getString(param, params);
     if (value.isEmpty()) {
       if (param.defaultValue != null)
@@ -165,7 +168,7 @@ public class DepictController {
     return Double.parseDouble(value);
   }
 
-  private int getInt(Param param, Map<String,String> params) {
+  private int getInt(Param param, Map<String, String> params) {
     String value = getString(param, params);
     if (value.isEmpty()) {
       if (param.defaultValue != null)
@@ -175,7 +178,7 @@ public class DepictController {
     return Integer.parseInt(value);
   }
 
-  private boolean getBoolean(Param param, Map<String,String> params) {
+  private boolean getBoolean(Param param, Map<String, String> params) {
     String value = params.get(param.name);
     if (value != null) {
       switch (value.toLowerCase(Locale.ROOT)) {
@@ -197,47 +200,47 @@ public class DepictController {
   }
 
   static Color getColor(String color) {
-    int vals[] = new int[]{0,0,0,255}; // r,g,b,a
-    int pos = 0;
-    int beg = 0;
+    int vals[] = new int[]{0, 0, 0, 255}; // r,g,b,a
+    int pos    = 0;
+    int beg    = 0;
     if (color.startsWith("0x"))
       beg = 2;
     else if (color.startsWith("#"))
       beg = 1;
-    for (; pos < 4 && beg+1 < color.length(); beg += 2) {
-      vals[pos++] = Integer.parseInt(color.substring(beg,beg+2), 16);
+    for (; pos < 4 && beg + 1 < color.length(); beg += 2) {
+      vals[pos++] = Integer.parseInt(color.substring(beg, beg + 2), 16);
     }
     return new Color(vals[0], vals[1], vals[2], vals[3]);
   }
 
-  private HydrogenDisplayType getHydrogenDisplay(Map<String,String> params) {
+  private HydrogenDisplayType getHydrogenDisplay(Map<String, String> params) {
     if (!getBoolean(Param.SUPRESSH, params)) {
       return HydrogenDisplayType.Provided;
     } else {
       switch (getString(Param.HDISPLAY, params)) {
-          case "suppressed":
-            return HydrogenDisplayType.Minimal;
-          case "provided":
-            return HydrogenDisplayType.Provided;
-          case "stereo":
-            return HydrogenDisplayType.Stereo;
-          case "bridgeheadtetrahedral":
-          case "bridgehead":
-          case "default":
-          case "smart":
-            return HydrogenDisplayType.Smart;
-          default:
-            return HydrogenDisplayType.Smart;
-        }
+        case "suppressed":
+          return HydrogenDisplayType.Minimal;
+        case "provided":
+          return HydrogenDisplayType.Provided;
+        case "stereo":
+          return HydrogenDisplayType.Stereo;
+        case "bridgeheadtetrahedral":
+        case "bridgehead":
+        case "default":
+        case "smart":
+          return HydrogenDisplayType.Smart;
+        default:
+          return HydrogenDisplayType.Smart;
       }
+    }
   }
 
   /**
    * Restful entry point.
    *
-   * @param smi      SMILES to depict
-   * @param fmt      output format
-   * @param style    preset style COW (Color-on-white), COB, BOW, COW
+   * @param smi   SMILES to depict
+   * @param fmt   output format
+   * @param style preset style COW (Color-on-white), COB, BOW, COW
    * @return the depicted structure
    * @throws CDKException something not okay with input
    * @throws IOException  problem reading/writing request
@@ -246,12 +249,11 @@ public class DepictController {
   public HttpEntity<?> depict(@RequestParam("smi") String smi,
                               @PathVariable("fmt") String fmt,
                               @PathVariable("style") String style,
-                              @RequestParam Map<String,String> extra) throws
-          CDKException,
-          IOException
-  {
+                              @RequestParam Map<String, String> extra) throws
+      CDKException,
+      IOException {
 
-    String abbr = getString(Param.ABBREVIATE, extra);
+    String abbr     = getString(Param.ABBREVIATE, extra);
     String annotate = getString(Param.ANNOTATE, extra);
 
     HydrogenDisplayType hDisplayType = getHydrogenDisplay(extra);
@@ -276,8 +278,7 @@ public class DepictController {
                                           new SymbolVisibility() {
                                             @Override
                                             public boolean visible(IAtom iAtom, List<IBond> list,
-                                                                   RendererModel rendererModel)
-                                            {
+                                                                   RendererModel rendererModel) {
                                               return list.isEmpty();
                                             }
                                           });
@@ -292,7 +293,7 @@ public class DepictController {
     Set<IChemObject> highlight;
 
     if (isRxn) {
-      rxn = smipar.parseReactionSmiles(smi);
+      rxn       = smipar.parseReactionSmiles(smi);
       highlight = findHits(getString(Param.SMARTSQUERY, extra),
                            rxn,
                            mol,
@@ -387,7 +388,6 @@ public class DepictController {
         break;
     }
 
-
     if (getBoolean(Param.SHOWTITLE, extra)) {
       if (isRxn)
         myGenerator = myGenerator.withRxnTitle();
@@ -395,12 +395,19 @@ public class DepictController {
         myGenerator = myGenerator.withMolTitle();
     }
 
+    // reactions are laid out in the main depiction gen
+    if (!isRxn && getBoolean(Param.FLIP, extra))
+      flip(mol);
+    int rotate = getInt(Param.ROTATE, extra);
+    if (!isRxn && rotate != 0)
+      rotate(mol, rotate);
+
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
     // pre-render the depiction
     final Depiction depiction = isRxn ? myGenerator.depict(rxn)
-            : isRgp ? myGenerator.depict(mols, mols.size(), 1)
-            : myGenerator.depict(mol);
+        : isRgp ? myGenerator.depict(mols, mols.size(), 1)
+        : myGenerator.depict(mol);
 
     switch (fmtlc) {
       case Depiction.SVG_FMT:
@@ -419,9 +426,19 @@ public class DepictController {
     throw new IllegalArgumentException("Unsupported format.");
   }
 
+  private void rotate(IAtomContainer mol, int rotate) {
+    Point2d c = GeometryUtil.get2DCenter(mol);
+    GeometryUtil.rotate(mol, c, Math.toRadians(rotate));
+  }
+
+  private void flip(IAtomContainer mol) {
+    for (IAtom atom : mol.atoms())
+      atom.getPoint2d().x = -atom.getPoint2d().x;
+  }
+
   private DepictionGenerator withBgFgColors(
-          @RequestParam Map<String, String> extra,
-          DepictionGenerator myGenerator) {
+      @RequestParam Map<String, String> extra,
+      DepictionGenerator myGenerator) {
     final String bgcolor = getString(Param.BGCOLOR, extra);
     switch (bgcolor) {
       case "clear":
@@ -453,8 +470,7 @@ public class DepictController {
     return myGenerator;
   }
 
-  private void annotateCip(IAtomContainer part)
-  {
+  private void annotateCip(IAtomContainer part) {
     CdkLabeller.label(part);
     for (IAtom atom : part.atoms()) {
       if (atom.getProperty(BaseMol.CONF_INDEX) != null)
@@ -471,8 +487,7 @@ public class DepictController {
     }
   }
 
-  private void setHydrogenDisplay(IAtomContainer mol, HydrogenDisplayType hDisplayType)
-  {
+  private void setHydrogenDisplay(IAtomContainer mol, HydrogenDisplayType hDisplayType) {
     switch (hDisplayType) {
       case Minimal:
         AtomContainerManipulator.suppressHydrogens(mol);
@@ -544,11 +559,11 @@ public class DepictController {
             }
             break;
             case IStereoElement.CisTrans: {
-              IBond focus = (IBond) se.getFocus();
-              IAtom begin = focus.getBegin();
-              IAtom end   = focus.getEnd();
+              IBond focus         = (IBond) se.getFocus();
+              IAtom begin         = focus.getBegin();
+              IAtom end           = focus.getEnd();
               IAtom hydrogenBegin = null;
-              IAtom hydrogenEnd = null;
+              IAtom hydrogenEnd   = null;
 
               if (begin.getImplicitHydrogenCount() == 1 &&
                   shouldAddH(mol, begin, mol.getConnectedBondsList(begin))) {
@@ -563,21 +578,20 @@ public class DepictController {
               }
 
               if (hydrogenBegin != null || hydrogenEnd != null) {
-                Map<IAtom,IAtom> map = new HashMap<>();
+                Map<IAtom, IAtom> map = new HashMap<>();
                 map.put(begin, hydrogenBegin);
                 map.put(end, hydrogenEnd);
                 ses.add(se.map(map));
-              }
-              else {
+              } else {
                 ses.add(se);
               }
             }
             break;
             case IStereoElement.Allenal: {
-              IAtom focus = (IAtom) se.getFocus();
+              IAtom   focus     = (IAtom) se.getFocus();
               IAtom[] terminals = ExtendedTetrahedral.findTerminalAtoms(mol, focus);
-              IAtom  hydrogen1 = null;
-              IAtom  hydrogen2 = null;
+              IAtom   hydrogen1 = null;
+              IAtom   hydrogen2 = null;
               if (terminals[0].getImplicitHydrogenCount() == 1) {
                 terminals[0].setImplicitHydrogenCount(0);
                 hydrogen1 = sproutHydrogen(mol, terminals[0]);
@@ -587,16 +601,15 @@ public class DepictController {
                 hydrogen2 = sproutHydrogen(mol, terminals[1]);
               }
               if (hydrogen1 != null || hydrogen2 != null) {
-                Map<IAtom,IAtom> map = new HashMap<>();
+                Map<IAtom, IAtom> map = new HashMap<>();
                 if (hydrogen1 != null)
                   map.put(terminals[0], hydrogen1);
                 if (hydrogen2 != null)
                   map.put(terminals[1], hydrogen2);
                 // find as focus is not one of the terminals
-                IStereoElement<IAtom,IAtom> tmp = se.map(map);
+                IStereoElement<IAtom, IAtom> tmp = se.map(map);
                 ses.add(tmp);
-              }
-              else {
+              } else {
                 ses.add(se);
               }
             }
@@ -624,7 +637,7 @@ public class DepictController {
       } else {
         for (IStereoElement se : mol.stereoElements()) {
           if (se.getConfigClass() == IStereoElement.TH &&
-                  se.getFocus().equals(nbr)) {
+              se.getFocus().equals(nbr)) {
             count++;
           }
         }
@@ -637,19 +650,17 @@ public class DepictController {
     return count == 3;
   }
 
-  private IAtom sproutHydrogen(IAtomContainer mol, IAtom focus)
-  {
+  private IAtom sproutHydrogen(IAtomContainer mol, IAtom focus) {
     IAtom hydrogen = mol.getBuilder().newAtom();
     hydrogen.setAtomicNumber(1);
     hydrogen.setSymbol("H");
     hydrogen.setImplicitHydrogenCount(0);
     mol.addAtom(hydrogen);
     mol.addBond(mol.indexOf(focus), mol.getAtomCount() - 1, IBond.Order.SINGLE);
-    return mol.getAtom(mol.getAtomCount()-1);
+    return mol.getAtom(mol.getAtomCount() - 1);
   }
 
-  private void contractHydrates(IAtomContainer mol)
-  {
+  private void contractHydrates(IAtomContainer mol) {
     Set<IAtom> hydrate = new HashSet<>();
     for (IAtom atom : mol.atoms()) {
       if (atom.getAtomicNumber() == 8 &&
@@ -672,7 +683,7 @@ public class DepictController {
         sgroups.get(0).getType() == SgroupType.CtabAbbreviation) {
       Sgroup sgrp = sgroups.get(0);
 
-      boolean okay = true;
+      boolean    okay  = true;
       Set<IAtom> atoms = sgrp.getAtoms();
       for (IAtom a : hydrate) {
         if (atoms.contains(a)) {
@@ -698,8 +709,7 @@ public class DepictController {
     }
   }
 
-  private boolean add(Set<IAtom> set, Set<IAtom> atomsToAdd)
-  {
+  private boolean add(Set<IAtom> set, Set<IAtom> atomsToAdd) {
     boolean res = true;
     for (IAtom atom : atomsToAdd) {
       if (!set.add(atom))
@@ -708,8 +718,7 @@ public class DepictController {
     return res;
   }
 
-  private void abbreviate(IReaction rxn, String mode, String annotate)
-  {
+  private void abbreviate(IReaction rxn, String mode, String annotate) {
     Multimap<IAtomContainer, Sgroup> sgroupmap = ArrayListMultimap.create();
     switch (mode.toLowerCase()) {
       case "true":
@@ -788,8 +797,7 @@ public class DepictController {
     }
   }
 
-  private void abbreviate(IAtomContainer mol, String mode, String annotate)
-  {
+  private void abbreviate(IAtomContainer mol, String mode, String annotate) {
     switch (mode.toLowerCase()) {
       case "true":
       case "on":
@@ -828,13 +836,11 @@ public class DepictController {
     }
   }
 
-  private boolean isRxnSmi(String smi)
-  {
+  private boolean isRxnSmi(String smi) {
     return smi.split(" ")[0].contains(">");
   }
 
-  private IAtomContainer loadMol(String str) throws CDKException
-  {
+  private IAtomContainer loadMol(String str) throws CDKException {
     if (str.contains("V2000")) {
       try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
         return mdlr.read(SilentChemObjectBuilder.getInstance().newAtomContainer());
@@ -852,8 +858,7 @@ public class DepictController {
     }
   }
 
-  private HttpEntity<byte[]> makeResponse(byte[] bytes, String contentType)
-  {
+  private HttpEntity<byte[]> makeResponse(byte[] bytes, String contentType) {
     HttpHeaders header  = new HttpHeaders();
     String      type    = contentType.substring(0, contentType.indexOf('/'));
     String      subtype = contentType.substring(contentType.indexOf('/') + 1, contentType.length());
@@ -872,8 +877,7 @@ public class DepictController {
    * @return configured depiction generator
    */
   private static DepictionGenerator withStyle(DepictionGenerator generator,
-                                              String style)
-  {
+                                              String style) {
     switch (style) {
       case "cow":
         generator = generator.withAtomColors(new CDK2DAtomColors())
@@ -882,7 +886,7 @@ public class DepictController {
         break;
       case "cot":
         generator = generator.withAtomColors(new CDK2DAtomColors())
-                             .withBackgroundColor(new Color(0,0,0,0))
+                             .withBackgroundColor(new Color(0, 0, 0, 0))
                              .withOuterGlowHighlight();
         break;
       case "bow":
@@ -891,7 +895,7 @@ public class DepictController {
         break;
       case "bot":
         generator = generator.withAtomColors(new UniColor(Color.BLACK))
-                             .withBackgroundColor(new Color(0,0,0,0));
+                             .withBackgroundColor(new Color(0, 0, 0, 0));
         break;
       case "wob":
         generator = generator.withAtomColors(new UniColor(Color.WHITE))
@@ -899,7 +903,7 @@ public class DepictController {
         break;
       case "wot":
         generator = generator.withAtomColors(new UniColor(Color.WHITE))
-                             .withBackgroundColor(new Color(0,0,0,0));
+                             .withBackgroundColor(new Color(0, 0, 0, 0));
         break;
       case "cob":
         generator = generator.withAtomColors(new CobColorer())
@@ -922,8 +926,7 @@ public class DepictController {
     private final CDK2DAtomColors colors = new CDK2DAtomColors();
 
     @Override
-    public Color getAtomColor(IAtom atom)
-    {
+    public Color getAtomColor(IAtom atom) {
       Color res = colors.getAtomColor(atom);
       if (res.equals(Color.BLACK))
         return Color.WHITE;
@@ -932,8 +935,7 @@ public class DepictController {
     }
 
     @Override
-    public Color getAtomColor(IAtom atom, Color color)
-    {
+    public Color getAtomColor(IAtom atom, Color color) {
       Color res = colors.getAtomColor(atom);
       if (res.equals(Color.BLACK))
         return Color.WHITE;
@@ -950,8 +952,7 @@ public class DepictController {
     private final Color           NEON   = new Color(0x00FF0E);
 
     @Override
-    public Color getAtomColor(IAtom atom)
-    {
+    public Color getAtomColor(IAtom atom) {
       Color res = colors.getAtomColor(atom);
       if (res.equals(Color.BLACK))
         return NEON;
@@ -960,8 +961,7 @@ public class DepictController {
     }
 
     @Override
-    public Color getAtomColor(IAtom atom, Color color)
-    {
+    public Color getAtomColor(IAtom atom, Color color) {
       Color res = colors.getAtomColor(atom, color);
       if (res.equals(Color.BLACK))
         return NEON;
@@ -979,9 +979,7 @@ public class DepictController {
    * @return set of matched atoms and bonds
    */
   private Set<IChemObject> findHits(final String sma, final IReaction rxn, final IAtomContainer mol,
-                                    final int limit)
-  {
-
+                                    final int limit) {
 
     Set<IChemObject> highlight = new HashSet<>();
     if (!sma.isEmpty()) {

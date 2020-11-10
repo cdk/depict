@@ -25,6 +25,8 @@ function update() {
               'style':     $("select[name='style'] option:selected").val(),
               'annotate':  $("select[name='annotate'] option:selected").val(),
               'zoom':      $("input[name='zoom']").val(),
+              'flip':      $("input[name='flip']").is(':checked'),
+              'rotate':    $("input[name='rotate']").val(),
               'sma':       $("input[name='smarts']").val(),
               'hdisp':     $("select[name='hdisp'] option:selected").val(),
               'showtitle': $("input[name='showtitle']").is(':checked'),
@@ -67,6 +69,10 @@ function depict_url(opts, smiles, w, h) {
       url += '&zoom=' + encodeURIComponent(opts.zoom/100);
     if (opts.annotate)
      url += '&annotate=' + encodeURIComponent(opts.annotate);
+  if (opts.flip)
+    url += '&f=1';
+  if (opts.rotate)
+    url += '&r=' + encodeURIComponent(opts.rotate);
 	return url;    
 }
 
