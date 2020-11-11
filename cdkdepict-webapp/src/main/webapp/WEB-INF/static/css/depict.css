@@ -1,22 +1,42 @@
 body {
-  font-family: Helvetica, Arial;
-  font-size: 11pt;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;  
   padding: 0;
   margin: 0;
-  background-color: #fcfcfc;
+  background-color: #5368ad;
+  color: #222;
 }
 
 .center {
 	margin: auto;
-	max-width:  260mm;
-	min-height: 100%;
+	max-width:  960px;
 	text-align: center;
+	background: white;
+  padding: 50px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  border-radius: 5px;
 }
 
-.depict_icon_button {
+.header {
+  text-align: left;
+  margin-bottom: 20px;  
+}
+
+.footer {
+  text-align: left;
+  font-size: small;
+  margin-top: 40px;
+  margin-bottom: -40px;
+}
+
+.header h1 {
+  color: #485c91;  
+}
+
+i.icon {
   margin: 1px;
   cursor: pointer;
-  float:  right;
+  vertical-align: middle;
 }
 
 .depict_icon_button:hover {
@@ -29,17 +49,10 @@ body {
 	font-size:  15pt;
 }
 
-.chemimg {
-	margin-left:    auto;
-	margin-right:   auto;
-	vertical-align: middle;  /* vertical alignment of the inline element */
-	display: inline-block;
+#result {
+  text-align: left;
+  padding: 5px 0 0 0;
 }
-
-.chemdiv a {
-  display: inline-block;
-}
-
 
 .chemdiv {
   display:          inline-block;
@@ -47,6 +60,130 @@ body {
   text-align:       center;
   vertical-align:   middle;
   background:       #fff;
+  padding:          2px;
+  box-sizing:       border-box;
+  transition: 600ms ease-in-out;
+}
+
+.chemdiv:hover {
+  background: #eeeeff;
+  transition: 600ms ease-in-out;
+}
+
+.chemdiv:hover .links {
+  opacity: 100%;
+}
+
+.chemdiv.molecule {
+  width:      240px;
+  max-width:  240px;
+  height:     200px;
+  max-height: 200px;
+}
+
+.chemdiv.reaction {
+  width:      480px;
+  max-width:  480px;
+  height:     200px;
+  max-height: 200px;
+}
+
+.chemdiv .grid {
+  display: grid;
+  grid-template-rows: minmax(0, auto) max-content;
+  grid-template-columns: minmax(0, auto);
+  grid-template-areas: "main"
+                       "bottom";
+  width: 100%;
+  height: 100%
+}
+
+.img {
+    justify-self: justify;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    text-align: center;
+    grid-area: main;
+    position: relative;
+}
+
+.img .valign-helper {
+    height: 100%;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.img img {
+    vertical-align: middle;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.title {
+  width: 100%;
+  font-size: smaller;
+  grid-area: bottom;
+}
+
+.links {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.links a {
+  color: inherit;
+  font-size: 16pt;
+  padding: 1px;
+}
+
+.links a:hover {
+  color: steelblue;
+  text-shadow: 0 0 3px steelblue;
+}
+
+/* styles */
+
+.chemdiv {
+  background: white;  
+}
+
+.wob .chemdiv,
+.cob .chemdiv,
+.wot .chemdiv {
+  background: black;
+  color: #eee;
+}
+
+.nob .chemdiv {
+  background: black;
+  color: #00FF0E;
+}
+
+.nob .links a:hover {
+  color: yellow;
+  text-shadow: 0 0 3px yellow;
+}
+
+.error {
+  color: red;
+  font-size: 9pt;
+  text-align: left;
+  overflow: hidden;
+}
+
+.error h1 {
+  font-size: 1.1em;
+  margin: 0;
+}
+
+.error pre {
+  font-size: 6pt;
+  font-family: Courier, 'Fixed Width';
 }
 
 #depict_extra_opts {
@@ -90,4 +227,14 @@ textarea#input {
 #sma {
 	width:  250px;
 	resize: none;
+}
+
+input,
+textarea {
+  border-radius: 3px;
+  border: 1px solid #444;
+}
+
+textarea {
+  padding: 5px;
 }

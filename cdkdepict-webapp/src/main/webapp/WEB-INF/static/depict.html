@@ -2,6 +2,7 @@
 <head>
   <title>CDK Depict</title>
   <link rel="stylesheet" type="text/css" href="css/depict.css">
+  <link rel="stylesheet" type="text/css" href="css/Glyphter.css">
   <link rel="stylesheet"
         href="https://use.fontawesome.com/releases/v5.0.10/css/all.css"
         integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg"
@@ -10,27 +11,17 @@
   <script src="js/depict.js" type="text/javascript"></script>
 </head>
 <body>
-<div class="center">
-  <br/>
-  <table class="grid">
-    <tr>
-      <td rowspan="3"><img src="img/logo.svg" height="125px"/></td>
-      <td><b>SMILES Depicter</b></td>
-    </tr>
-    <tr>
-      <td>Generate depictions of molecules and reactions from SMILES. <br/>
-        Depictions are generated using the <a
-            href="https://www.github.com/cdk/cdk">Chemistry Development Kit</a>.
-        <a style="position: absolute; right: 0; top: 0;"
-           href="https://github.com/cdk/depict"><img
-            src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
-      </td>
-    </tr>
-    <tr>
-      <td>Version: ${project.version} (CDK ${cdk.version})</td>
-    </tr>
-  </table>
-  <textarea id="input" class="textin" onkeyup="update()" autofocus>CN1C=NC2=C1C(=O)N(C(=O)N2C)C caffeine
+<div class="center" style="background: none; margin-top: 0; margin-bottom: -80px; text-align: left; font-size: 40pt; font-weight: bold; color: #fff;">
+  <img src="img/depict-logo-cutout-white.svg" height="80px"/>
+</div>
+<div class="center">  
+  <div class="header"> 
+    Generate depictions of molecules and reactions from <a href="https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system">SMILES</a> or <a href="https://en.wikipedia.org/wiki/Chemical_table_file">SDF</a>.
+           <a style="position: absolute; right: 0; top: 0;"
+          href="https://github.com/cdk/depict"><img
+           src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+  </div>
+  <textarea id="input" onkeyup="update()" autofocus>CN1C=NC2=C1C(=O)N(C(=O)N2C)C caffeine
 [Cs+].[O-]C(=O)[O-].[Cs+] Cs2CO3
 [Li+].[Al+3].[H-].[H-].[H-].[H-] LiAlH4
 Cl[Pt@SP1](Cl)([NH3])[NH3] cis-platin
@@ -46,12 +37,15 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
 [CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][cH:13][cH:14][cH:15]1.[CH2:3]([CH2:4][C:5](=[O:6])Cl)[CH2:2][Cl:1]>[Al+3].[Cl-].[Cl-].[Cl-].C(Cl)Cl>[CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][c:13]([cH:14][cH:15]1)[C:5](=[O:6])[CH2:4][CH2:3][CH2:2][Cl:1] |f:2.3.4.5| Friedel-Crafts acylation [3.10.1]
 </textarea>
   <div id="depict_main_opts">
+    <i title="Clear input"
+       onclick="clearInput(); update();"
+       class="fas fa-trash-alt icon"></i>
     <select name="style" onchange="update()">
       <option value="cow">Color on White</option>
       <option value="cob">Color on Black</option>
       <option value="cot">Color on Clear</option>
-      <option value="bow" selected>Black on White</option>
-      <option value="bot">Black on Clear</option>
+      <option value="bow">Black on White</option>
+      <option value="bot" selected>Black on Clear</option>
       <option value="wob">White on Black</option>
       <option value="nob">Neon on Black</option>
     </select>
@@ -75,12 +69,12 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
       <option value="groups">Abbreviate Groups</option>
       <option value="off">Do Not Abbreviate</option>
     </select>
-    <i title="More Options"
+    <input id="sma" onkeyup="update()" name="smarts"
+           type="text" placeholder="Enter SMARTS pattern...">
+    <i id="more-opts"
+       title="More Options"
        onclick="toggleExtraOpts();"
-       class="fas fa-cog depict_icon_button"></i>
-    <i title="Clear input"
-       onclick="clearInput(); update();"
-       class="fas fa-eraser depict_icon_button"></i>
+       class="fas fa-ellipsis-h icon"></i>
     </button>
   </div>
   <div id="depict_extra_opts">
@@ -89,7 +83,7 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
         <th>Zoom</th>
         <td>
           <input onchange="update()" name="zoom" type="range" min="10" max="500"
-                 step="5" value="160">
+                 step="5" value="125">
         </td>
         <th>Rotate</th>
         <td>
@@ -102,23 +96,21 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
         </td>
       </tr>
       <tr>
-        <th>Render Title</th>
+        <th>Embed Title</th>
         <td>
           <input type="checkbox" name="showtitle" onchange="update()">
         </td>
-        <th>Highlight</th>
-        <td colspan="4"><input id="sma" class="textin" onkeyup="update()" name="smarts"
-                               type="text" placeholder="Enter SMARTS pattern..."></td>
       </tr>
     </table>
   </div>
   <div id="result">
   </div>
+  <div class="footer">
+    Built with the <a href="https://www.github.com/cdk/cdk">Chemistry Development Kit</a>. Depict v${project.version}, CDK v${cdk.version}.
+  </div>
 </div>
 <script type="text/javascript">
     window.onload = update();
-
-
 </script>
 </body>
 </html>

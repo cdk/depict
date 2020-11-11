@@ -23,7 +23,6 @@ public class MolOp {
     return v;
   }
 
-
   private static boolean isDativeDonor(IAtom a) {
     switch (a.getAtomicNumber()) {
       case 7:
@@ -35,7 +34,6 @@ public class MolOp {
         return false;
     }
   }
-
 
   private static boolean isDativeAcceptor(IAtom a) {
     if (Elements.isMetal(a))
@@ -50,7 +48,6 @@ public class MolOp {
     }
   }
 
-
   private static boolean isPosDativeDonor(IAtom a) {
     switch (a.getAtomicNumber()) {
       case 7:
@@ -62,7 +59,6 @@ public class MolOp {
         return false;
     }
   }
-
 
   private static boolean isNegDativeAcceptor(IAtom a) {
     if (a.getFormalCharge() != -1)
@@ -78,7 +74,6 @@ public class MolOp {
         return false;
     }
   }
-
 
   public static void perceiveRadicals(IAtomContainer mol) {
     for (IAtom atom : mol.atoms()) {
@@ -115,8 +110,20 @@ public class MolOp {
     }
   }
 
-
   public static void perceiveDativeBonds(IAtomContainer mol) {
+    for (IBond bond : mol.bonds()) {
+      IAtom beg = bond.getBegin();
+      IAtom end = bond.getEnd();
+      if (isPosDativeDonor(end) && isNegDativeAcceptor(beg)) {
+        bond.setDisplay(IBond.Display.ArrowBeg);
+        beg.setFormalCharge(beg.getFormalCharge() + 1);
+        end.setFormalCharge(end.getFormalCharge() - 1);
+      } else if (isPosDativeDonor(beg) && isNegDativeAcceptor(end)) {
+        bond.setDisplay(IBond.Display.ArrowEnd);
+        beg.setFormalCharge(beg.getFormalCharge() - 1);
+        end.setFormalCharge(end.getFormalCharge() + 1);
+      }
+    }
     for (IBond bond : mol.bonds()) {
       IAtom beg = bond.getBegin();
       IAtom end = bond.getEnd();
@@ -124,14 +131,6 @@ public class MolOp {
         bond.setDisplay(IBond.Display.ArrowBeg);
       } else if (isDativeDonor(beg) && isDativeAcceptor(end)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
-      } else if (isPosDativeDonor(end) && isNegDativeAcceptor(beg)) {
-        bond.setDisplay(IBond.Display.ArrowBeg);
-        beg.setFormalCharge(beg.getFormalCharge()+1);
-        end.setFormalCharge(end.getFormalCharge()-1);
-      } else if (isPosDativeDonor(beg) && isNegDativeAcceptor(end)) {
-        bond.setDisplay(IBond.Display.ArrowEnd);
-        beg.setFormalCharge(beg.getFormalCharge()-1);
-        end.setFormalCharge(end.getFormalCharge()+1);
       }
     }
   }

@@ -13,6 +13,7 @@ import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.geometry.GeometryUtil;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtom;
@@ -34,7 +35,6 @@ import org.openscience.cdk.renderer.generators.standard.StandardGenerator.Visibi
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupKey;
 import org.openscience.cdk.sgroup.SgroupType;
-import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smarts.SmartsPattern;
@@ -44,11 +44,16 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.WebRequest;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
@@ -61,6 +66,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,6 +77,7 @@ import java.util.concurrent.Executors;
 /**
  * Chemical structure depiction controller.
  */
+@CrossOrigin
 @Controller
 public class DepictController {
 
@@ -1010,6 +1017,38 @@ public class DepictController {
       }
     }
     return highlight;
+  }
 
+  @ExceptionHandler({Exception.class, InvalidSmilesException.class})
+  public static ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
+    if (ex instanceof InvalidSmilesException) {
+      InvalidSmilesException ise = (InvalidSmilesException) ex;
+      String mesg = ise.getMessage();
+      String disp = "";
+      if (mesg.endsWith("^")) {
+        int i = mesg.indexOf(":\n");
+        if (i >= 0) {
+          disp = mesg.substring(i + 2);
+          mesg = mesg.substring(0, i);
+        }
+      }
+      return new ResponseEntity<>("<!DOCTYPE html><html>" +
+                                  "<title>400 - Invalid SMILES</title>" +
+                                  "<body><div>" +
+                                  "<h1>Invalid SMILES</h1>" +
+                                  mesg +
+                                  "<pre>" + disp + "</pre>" +
+                                  "</div></body>" +
+                                  "</html>",
+                                  new HttpHeaders(),
+                                  HttpStatus.BAD_REQUEST);
+    } else {
+      return new ResponseEntity<>("<!DOCTYPE html><html><title>500 - Internal Server Error</title><body><div>" +
+                                  "<h1>" + ex.getClass().getSimpleName() + "</h1>" +
+                                  ex.getMessage() +
+                                  "</div></body></html>",
+                                  new HttpHeaders(),
+                                  HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

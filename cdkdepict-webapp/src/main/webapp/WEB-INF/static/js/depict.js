@@ -1,3 +1,6 @@
+var ROOT_URL = "."
+//var ROOT_URL = "http://localhost:8080/cdkdepict/"
+
 function clearInput() {
   $('#input').val('');
 }
@@ -14,6 +17,50 @@ function smittl(smiles) {
   if (i < 0)
     return ''; // no title
   return smiles.substring(i+1);
+}
+
+function renderSMILES(inputs, opts) {
+  var result = [];
+
+  var nlines = inputs.length < 500 ? inputs.length : 500;
+  if (inputs.length > 500) {
+    alert("Only the first 500 entries will be displayed!");
+  }
+
+  for (var i = 0; i < nlines; i++) {
+    var input = inputs[i].trim();
+
+    // skip empty lines and comments
+    if (input.length == 0 || input.charAt(0) === '#')
+      continue
+
+    var title = smittl(input);
+    title = title.replace(/^\|[^|]+\|\s+/, "");
+    if (!title)
+      title = "#" + (1+i);
+
+    result.push(generate(opts, input, title));
+  }
+  return result;
+}
+
+function renderCTAB(inputs, opts) {
+  var result = [];
+  var nlines = inputs.length < 500 ? inputs.length : 500;
+  if (inputs.length > 500) {
+    alert("Only the first 500 entries will be displayed!");
+  }
+
+  for (var i = 0; i < nlines; i++) {
+    var input = inputs[i];
+
+    // skip empty lines and comments
+    if (input.trim().length == 0)
+      continue
+
+    result.push(generate(opts, input, input.substring(0, input.indexOf('\n'))));
+  }
+  return result;
 }
 
 function update() {
@@ -33,31 +80,22 @@ function update() {
               'abbr':      $("select[name='abbr'] option:selected").val()
               };
 
-  var lines  = input.split("\n");
-  var nlines = lines.length < 500 ? lines.length : 500;
+  result.removeClass().addClass(opts.style);
 
-  if (lines.length > 500) {
-    alert("Only the first 500 structure will be displayed!");
-  }
+  var inputs = [];
 
-  for (var i = 0; i < nlines; i++) {
-    var line = lines[i].trim();
-    
-    // skip empty lines and comments
-    if (line.length == 0 || line.charAt(0) === '#')
-      continue
-
-    var title = smittl(line);
-    title = title.replace(/^\|[^|]+\|\s+/, "");
-    if (!title)
-      title = "#" + (1+i);
-  	result.append(generate(opts, line, title));
+  if (input.indexOf("V2000") >= 0 && input.indexOf("M  END") >= 0) {
+    inputs = input.split("$$$$\n");
+    result.append(renderCTAB(inputs, opts));
+  } else {
+    inputs = input.split("\n");
+    result.append(renderSMILES(inputs, opts));
   }
 }
 
-function depict_url(opts, smiles, w, h) {
+function depict_url(opts, smiles, fmt, w, h) {
 	var smi = encodeURIComponent(smiles);
-	var url = './depict/' + opts.style + '/svg?smi=' + smi;
+	var url = ROOT_URL + '/depict/' + opts.style + '/' + fmt + '?smi=' + smi;
 	if (w && h)
 	  url += '&w=' + w + '&h=' + h;
 	url += '&abbr=' + opts.abbr;
@@ -78,12 +116,31 @@ function depict_url(opts, smiles, w, h) {
 
 function generate(opts, smiles, title) {
     var isrxn  = smiles.indexOf('>') != -1;
-    var width  = isrxn ? '210' : '80';
-    var height = '50';
-    return $('<div>').addClass('chemdiv')
-                     .append($('<a>').attr('href', depict_url(opts, smiles))
-                                     .append($('<img>').addClass('chemimg')
-                                                       .addClass(isrxn ? 'chemrxn' : 'chemmol')
-                                                       .attr('src', depict_url(opts, smiles, width, height))))
-                     .append($('<div>').append(title));
+
+    var svg_url = depict_url(opts, smiles, 'svg', -1, -1);
+    var png_url = depict_url(opts, smiles, 'png', -1, -1);
+    var pdf_url = depict_url(opts, smiles, 'pdf', -1, -1);
+
+    var $outer = $('<div>').addClass('chemdiv')
+                           .addClass(isrxn ? 'reaction' : 'molecule');
+    var $img = $('<div class="img">').append('<span class="valign-helper"></span>')
+                                     .append($('<a href="' + svg_url + '">').append($('<img onerror="handle_img_error(this)">').addClass('chemimg').attr('src', svg_url)));
+    var $div =  $('<div class="grid">').append($img);
+    var $links = $("<div class='links'>");
+    $links.append('<a title="Download SVG" href="' + svg_url + '" download="' + title + '.svg"><i class="icon-file-svg icon" aria-hidden="true"></i></a><br>');
+    $links.append('<a title="Download PNG" href="' + png_url + '" download="' + title + '.png"><i class="icon-file-png icon" aria-hidden="true"></i></a><br>');
+    $links.append('<a title="Download PDF" href="' + pdf_url + '" download="' + title + '.pdf"><i class="icon-file-pdf icon" aria-hidden="true"></i></a>');
+    $img.append($links);
+    if (!opts.showtitle)
+      $div.append($('<div class="title">').append(title));
+    $outer.append($div);
+    return $outer;
+}
+
+function handle_img_error(img) {
+  $.ajax($(img).attr('src')).error(function(r){
+    reason = r.responseText;
+    var tempDom = $('<output>').append($.parseHTML(reason));
+    $(img).parent().html($('<div class="error">').append($('div', tempDom).html()));
+  });
 }
