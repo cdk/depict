@@ -140,7 +140,9 @@ public class DepictController {
     FLIP("f", false),
     WIDTH("w", -1),
     HEIGHT("h", -1),
-    SVGUNITS("svgunits", "mm");
+    SVGUNITS("svgunits", "mm"),
+    SMILE("smi", ""),
+    REORIENT("reorient", true);
     private final String name;
     private final Object defaultValue;
 
@@ -245,7 +247,7 @@ public class DepictController {
   /**
    * Restful entry point.
    *
-   * @param smi   SMILES to depict
+   *
    * @param fmt   output format
    * @param style preset style COW (Color-on-white), COB, BOW, COW
    * @return the depicted structure
@@ -253,13 +255,17 @@ public class DepictController {
    * @throws IOException  problem reading/writing request
    */
   @RequestMapping("depict/{style}/{fmt}")
-  public HttpEntity<?> depict(@RequestParam("smi") String smi,
-                              @PathVariable("fmt") String fmt,
+  public HttpEntity<?> depict(@PathVariable("fmt") String fmt,
                               @PathVariable("style") String style,
-                              @RequestParam Map<String, String> extra) throws
+                              @RequestParam Map<String, String> extra,
+                              @RequestBody(required=false) String moltext ) throws
       CDKException,
       IOException {
 
+    String smi      = getString(Param.SMILE, extra);
+    if (smi == ""){
+      smi = moltext;
+    }
     String abbr     = getString(Param.ABBREVIATE, extra);
     String annotate = getString(Param.ANNOTATE, extra);
 
@@ -331,7 +337,10 @@ public class DepictController {
       abbreviate(mol, abbr, annotate);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol);
-      new StructureDiagramGenerator().generateCoordinates(mol);
+      if (getBoolean(Param.REORIENT, extra)){
+        new StructureDiagramGenerator().generateCoordinates(mol);
+      }
+      //
     }
 
     // Add annotations
