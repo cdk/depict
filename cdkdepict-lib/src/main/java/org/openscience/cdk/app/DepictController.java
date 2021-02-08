@@ -8,6 +8,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.simolecule.centres.BaseMol;
 import com.simolecule.centres.CdkLabeller;
+import com.simolecule.centres.Descriptor;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
@@ -479,6 +480,37 @@ public class DepictController {
 
   private void annotateCip(IAtomContainer part) {
     CdkLabeller.label(part);
+
+    // update to label appropriately for racmic and relative stereochemistry
+    for (IStereoElement<?,?> se : part.stereoElements()) {
+    	if (se.getConfigClass() == IStereoElement.TH &&
+					se.getGroupInfo() != 0) {
+				IAtom focus = (IAtom)se.getFocus();
+				Object label = focus.getProperty(BaseMol.CIP_LABEL_KEY);
+				if (label instanceof Descriptor &&
+						label != Descriptor.ns &&
+						label != Descriptor.Unknown) {
+					if ((se.getGroupInfo() & IStereoElement.GRP_RAC) != 0) {
+						Descriptor inv = null;
+						switch ((Descriptor)label) {
+							case R:
+								inv = Descriptor.S; break;
+							case S:
+								inv = Descriptor.R; break;
+							case r:
+								inv = Descriptor.s; break;
+							case s:
+								inv = Descriptor.r; break;
+						}
+						if (inv != null)
+							focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + inv.name());
+					} else if ((se.getGroupInfo() & IStereoElement.GRP_REL) != 0) {
+						focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + "*");
+					}
+				}
+			}
+		}
+
     for (IAtom atom : part.atoms()) {
       if (atom.getProperty(BaseMol.CONF_INDEX) != null)
         atom.setProperty(StandardGenerator.ANNOTATION_LABEL,
