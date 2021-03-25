@@ -16,6 +16,7 @@ import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.geometry.GeometryUtil;
+import org.openscience.cdk.graph.ConnectedComponents;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -67,7 +68,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -407,8 +407,14 @@ public class DepictController {
     if (!isRxn && getBoolean(Param.FLIP, extra))
       flip(mol);
     int rotate = getInt(Param.ROTATE, extra);
-    if (!isRxn && rotate != 0)
-      rotate(mol, rotate);
+    if (rotate != 0) {
+      if (isRxn) {
+        for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn))
+          rotate(part, rotate);
+      } else {
+        rotate(mol, rotate);
+      }
+    }
 
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
@@ -543,9 +549,11 @@ public class DepictController {
                 IAtom          hydrogen = sproutHydrogen(mol, focus);
                 IStereoElement tmp      = se.map(Collections.singletonMap(focus, hydrogen));
                 // need to keep focus same
-                ses.add(new TetrahedralChirality(focus,
-                                                 (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
-                                                 tmp.getConfig()));
+                TetrahedralChirality e = new TetrahedralChirality(focus,
+                                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
+                                                                  tmp.getConfig());
+                e.setGroupInfo(se.getGroupInfo());
+                ses.add(e);
               } else {
                 ses.add(se);
               }
@@ -589,9 +597,11 @@ public class DepictController {
                 IAtom          hydrogen = sproutHydrogen(mol, focus);
                 IStereoElement tmp      = se.map(Collections.singletonMap(focus, hydrogen));
                 // need to keep focus same
-                ses.add(new TetrahedralChirality(focus,
-                                                 (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
-                                                 tmp.getConfig()));
+                TetrahedralChirality e = new TetrahedralChirality(focus,
+                                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
+                                                                  tmp.getConfig());
+                e.setGroupInfo(se.getGroupInfo());
+                ses.add(e);
               } else {
                 ses.add(se);
               }
