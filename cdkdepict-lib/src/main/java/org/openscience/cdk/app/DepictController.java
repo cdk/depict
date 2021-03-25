@@ -277,8 +277,6 @@ public class DepictController {
     myGenerator = myGenerator.withAnnotationScale(0.7)
                              .withAnnotationColor(Color.RED);
 
-    // align rxn maps
-    myGenerator = myGenerator.withMappedRxnAlign(getBoolean(Param.ALIGNRXNMAP, extra));
 
     // Improved depiction of anatomised graphs, e.g. ***1*****1**
     if (getBoolean(Param.ANON, extra)) {
@@ -299,6 +297,9 @@ public class DepictController {
     List<IAtomContainer> mols  = null;
 
     Set<IChemObject> highlight;
+
+    StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+    sdg.setAlignMappedReaction(getBoolean(Param.ALIGNRXNMAP, extra));
 
     if (isRxn) {
       rxn       = smipar.parseReactionSmiles(smi);
@@ -322,6 +323,7 @@ public class DepictController {
         MolOp.perceiveRadicals(component);
         MolOp.perceiveDativeBonds(component);
       }
+      sdg.generateCoordinates(rxn);
     } else {
       mol = loadMol(smi);
       setHydrogenDisplay(mol, hDisplayType);
@@ -332,7 +334,7 @@ public class DepictController {
       abbreviate(mol, abbr, annotate);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol);
-      new StructureDiagramGenerator().generateCoordinates(mol);
+      sdg.generateCoordinates(mol);
     }
 
     // Add annotations
@@ -404,8 +406,13 @@ public class DepictController {
     }
 
     // reactions are laid out in the main depiction gen
-    if (!isRxn && getBoolean(Param.FLIP, extra))
-      flip(mol);
+    if (getBoolean(Param.FLIP, extra)) {
+      if (isRxn) {
+        for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn))
+          flip(part);
+      } else
+        flip(mol);
+    }
     int rotate = getInt(Param.ROTATE, extra);
     if (rotate != 0) {
       if (isRxn) {
