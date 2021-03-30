@@ -16,7 +16,6 @@ import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.geometry.GeometryUtil;
-import org.openscience.cdk.graph.ConnectedComponents;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -152,9 +151,9 @@ public class DepictController {
   }
 
   public DepictController() throws IOException {
-    this.abbreviations.loadFromFile("/org/openscience/cdk/app/abbreviations.smi");
-    this.abbreviations.loadFromFile("/org/openscience/cdk/app/reagents.smi");
-    this.reagents.loadFromFile("/org/openscience/cdk/app/reagents.smi");
+    this.abbreviations.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
+    this.abbreviations.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
+    this.reagents.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
     this.reagents.setContractToSingleLabel(true);
     abbreviations.setContractOnHetero(false);
   }
@@ -277,6 +276,8 @@ public class DepictController {
     myGenerator = myGenerator.withAnnotationScale(0.7)
                              .withAnnotationColor(Color.RED);
 
+    // align rxn maps
+    myGenerator = myGenerator.withMappedRxnAlign(getBoolean(Param.ALIGNRXNMAP, extra));
 
     // Improved depiction of anatomised graphs, e.g. ***1*****1**
     if (getBoolean(Param.ANON, extra)) {
@@ -510,15 +511,16 @@ public class DepictController {
 								inv = Descriptor.S; break;
 							case S:
 								inv = Descriptor.R; break;
-							case r:
-								inv = Descriptor.s; break;
-							case s:
-								inv = Descriptor.r; break;
 						}
 						if (inv != null)
 							focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + inv.name());
 					} else if ((se.getGroupInfo() & IStereoElement.GRP_REL) != 0) {
-						focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + "*");
+            switch ((Descriptor)label) {
+              case R:
+              case S:
+                focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + "*");
+                break;
+            }
 					}
 				}
 			}
