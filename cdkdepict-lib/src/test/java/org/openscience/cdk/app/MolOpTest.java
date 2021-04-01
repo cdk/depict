@@ -28,7 +28,7 @@ public class MolOpTest {
       if (bond.getDisplay() != IBond.Display.Solid)
         count++;
     }
-    assertThat(count, CoreMatchers.is(1));
+    assertThat(count, CoreMatchers.is(2));
   }
 
   @Test public void NO3() throws InvalidSmilesException {
