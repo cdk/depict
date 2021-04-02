@@ -9,7 +9,7 @@ A web application for generating chemical structure depictions from SMILES.
 An image is available on DockerHub, [https://hub.docker.com/r/simolecule/cdkdepict/](https://hub.docker.com/r/simolecule/cdkdepict/). To launch a CDK Depict web serivce running on 8081:
 
 ```
-$ docker run -p 8081:8080 simolecule/cdkdepict:1.5
+$ docker run -p 8081:8080 simolecule/cdkdepict:1.6
 ```
 
 #### Prepacked release
