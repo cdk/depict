@@ -77,8 +77,8 @@ CC(C)(C)OC(*)=O Boc
 *OC(=O)C OAc
 *C(=O)C Ac
 *C(=O)O CO2H
-*C(=O)C CO2Me
-*C(=O)N CO2NH2
+*C(=O)C COMe
+*C(=O)N CONH2
 *C(=O)[O-] COO-
 *N(=O)=O NO2
 *[N+](=O)[O-] NO2
