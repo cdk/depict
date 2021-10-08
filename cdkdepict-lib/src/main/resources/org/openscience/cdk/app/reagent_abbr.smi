@@ -9,7 +9,8 @@ Cl[Al](Cl)Cl	AlCl3
 [Cl-].[Cl-].[Cl-].[Al+3]	AlCl3
 C[Al](C)C	AlMe3
 BrB(Br)Br	BBr3
-F[B-](F)(F)F	BF4
+F[B-](F)(F)F	BF4-
+F[B-](F)(F)F.[H+]	BF4H
 c1ccc(cc1)P(c1ccccc1)c1ccc2ccccc2c1-c1c2ccccc2ccc1P(c1ccccc1)c1ccccc1	BINAP
 CN(C)[P+](On1nnc2ccccc21)(N(C)C)N(C)C.F[P-](F)(F)(F)(F)F	BOP
 c1ccccc1	Benzene
