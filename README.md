@@ -44,6 +44,17 @@ browser.
 $ java -jar target/cdkdepict-1.6.jar -httpPort 8081
 ```
 
+#### Caching
+
+When running your own CDK Depict it's useful to enable caching of the generated
+content. To enable caching you need to add the following setting to either the
+WebApp or TomCat's global ``context.xml``:
+
+```
+<Valve className="org.apache.catalina.authenticator.BasicAuthenticator"
+  disableProxyCaching="false" />
+```
+
 ### Docker container
 
 A docker container (using alpine linux) can be built and run as follows:
@@ -62,3 +73,4 @@ $ docker run -p 8180:8080 cdkdepict
 #### License
 
 LGPL v2.1 or later
+
