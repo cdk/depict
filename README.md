@@ -16,8 +16,8 @@ $ docker run -p 8081:8080 simolecule/cdkdepict:1.6
 
 You can download prebuilt releases from GitHub:
  
- * [`cdkdepict-1.6.war`](https://github.com/cdk/depict/releases/download/1.6/cdkdepict-1.6.war)
- * [`cdkdepict-1.6.jar`](https://github.com/cdk/depict/releases/download/1.6/cdkdepict-1.6.jar)
+ * [`cdkdepict-1.7.war`](https://github.com/cdk/depict/releases/download/1.7/cdkdepict-1.7.war)
+ * [`cdkdepict-1.7.jar`](https://github.com/cdk/depict/releases/download/1.7/cdkdepict-1.7.jar)
 
 #### Build
 
