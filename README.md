@@ -30,8 +30,8 @@ target directory. The WAR file can be deployed to an application server (e.g.
 TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded server.
 
 ```
-$ target/cdkdepict-1.6.war
-$ target/cdkdepict-1.6.jar
+$ target/cdkdepict-1.7.war
+$ target/cdkdepict-1.7.jar
 ```
 
 #### Embedded App
@@ -41,7 +41,7 @@ Run the following command and access the site 'http://localhost:8081' by web
 browser.
 
 ```
-$ java -jar target/cdkdepict-1.6.jar -httpPort 8081
+$ java -jar target/cdkdepict-1.7.jar -httpPort 8081
 ```
 
 #### Caching
