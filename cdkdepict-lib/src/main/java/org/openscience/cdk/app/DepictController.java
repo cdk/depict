@@ -324,7 +324,8 @@ public class DepictController {
         MolOp.perceiveRadicals(component);
         MolOp.perceiveDativeBonds(component);
       }
-      sdg.generateCoordinates(rxn);
+      if (!GeometryUtil.has2DCoordinates(rxn))
+        sdg.generateCoordinates(rxn);
     } else {
       mol = loadMol(smi);
       setHydrogenDisplay(mol, hDisplayType);
@@ -335,7 +336,8 @@ public class DepictController {
       abbreviate(mol, abbr, annotate);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol);
-      sdg.generateCoordinates(mol);
+      if (!GeometryUtil.has2DCoordinates(mol))
+        sdg.generateCoordinates(mol);
     }
 
     // Add annotations
