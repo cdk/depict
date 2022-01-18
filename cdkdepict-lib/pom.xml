@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdkdepict</artifactId>
     <groupId>org.openscience.cdk</groupId>
-    <version>1.7</version>
+    <version>1.8</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cdkdepict-lib</artifactId>
@@ -40,6 +40,11 @@
     <dependency>
       <groupId>org.openscience.cdk</groupId>
       <artifactId>cdk-silent</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-smarts</artifactId>
       <version>${cdk.version}</version>
     </dependency>
     <dependency>
