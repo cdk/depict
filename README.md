@@ -16,8 +16,8 @@ $ docker run -p 8081:8080 simolecule/cdkdepict:1.6
 
 You can download prebuilt releases from GitHub:
  
- * [`cdkdepict-1.8.war`](https://github.com/cdk/depict/releases/download/1.8/cdkdepict-1.8.war)
- * [`cdkdepict-1.8.jar`](https://github.com/cdk/depict/releases/download/1.8/cdkdepict-1.8.jar)
+ * [`cdkdepict-1.9.2.war`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-1.9.2.war)
+ * [`cdkdepict-1.9.2.jar`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-1.9.2.jar)
 
 #### Build
 
@@ -30,8 +30,8 @@ target directory. The WAR file can be deployed to an application server (e.g.
 TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded server.
 
 ```
-$ target/cdkdepict-1.8.war
-$ target/cdkdepict-1.8.jar
+$ target/cdkdepict-1.9.2.war
+$ target/cdkdepict-1.9.2.jar
 ```
 
 #### Embedded App
@@ -41,7 +41,7 @@ Run the following command and access the site 'http://localhost:8081' by web
 browser.
 
 ```
-$ java -jar target/cdkdepict-1.8.jar -httpPort 8081
+$ java -jar target/cdkdepict-1.9.2.jar -httpPort 8081
 ```
 
 #### Caching
