@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openscience.cdk</groupId>
   <artifactId>cdkdepict</artifactId>
-  <version>1.8</version>
+  <version>1.9</version>
   <modules>
     <module>cdkdepict-lib</module>    
     <module>cdkdepict-webapp</module>
@@ -83,6 +83,53 @@
       </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-atomtype</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-standard</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-io</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-ioformats</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-isomorphism</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-smiles</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-silent</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-interfaces</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openscience.cdk</groupId>
+      <artifactId>cdk-ctab</artifactId>
+      <version>${cdk.version}</version>
+    </dependency>
+  </dependencies>
   <profiles>
     <profile>
       <id>ossrh</id>

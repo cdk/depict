@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdkdepict</artifactId>
     <groupId>org.openscience.cdk</groupId>
-    <version>1.8</version>
+    <version>1.9</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cdkdepict-lib</artifactId>
@@ -50,37 +50,7 @@
     <dependency>
       <groupId>com.simolecule.centres</groupId>
       <artifactId>centres-cdk</artifactId>
-      <version>1.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-atomtype</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-standard</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-io</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-ioformats</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-isomorhism</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-smiles</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.openscience.cdk</groupId>
-          <artifactId>cdk-silent</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>1.1</version>
     </dependency>
   </dependencies>
 </project>

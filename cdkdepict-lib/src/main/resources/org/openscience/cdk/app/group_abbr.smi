@@ -93,6 +93,7 @@ CC(C)(C)OC(*)=O Boc
 *C=O CHO
 *[Si](C)(C)C(C)(C)C TBS
 *[P](c1ccccc1)(c1ccccc1)c1ccccc1 PPh3
+*O[Si](C1=CC=CC=C1)(C1=CC=CC=C1)C(C)(C)C OSiPh2tBu
 
 # linear alkyls
 *CCCCCCCCCCCCCCCCCCCC C20H41
