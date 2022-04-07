@@ -8,6 +8,6 @@ RUN apk add --no-cache ttf-dejavu && \
     /usr/share/fonts/ttf-dejavu/DejaVuSansMono* \
     /usr/share/fonts/ttf-dejavu/DejaVuSans-* \
     /usr/share/fonts/ttf-dejavu/DejaVuMath*
-COPY cdkdepict.jar .
+COPY cdkdepict.war .
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "cdkdepict.jar", "--httpPort", "8080"]
+ENTRYPOINT ["java",  "-D=server.port=8080", "-jar", "cdkdepict.war"]

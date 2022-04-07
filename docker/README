@@ -4,7 +4,7 @@ Build
 To build the 'cdk/depict' container copy the JAR file built with MAVEN 
 to the directory with the Docker file.
 
-	$ cp ../cdkdepict-webapp/target/cdkdepict*.jar cdkdepict.jar
+	$ cp ../cdkdepict-webapp/target/cdkdepict*.war cdkdepict.war
 	$ docker build -t cdkdepict -f Dockerfile .
 
 Alternatively run the 'build.sh' script.
