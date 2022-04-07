@@ -63,6 +63,9 @@
       <!-- Create a "bootable" WAR using Spring Boot, this is slightly larger
            but can safely be deployed to a normal TomCat server as well -->
       <id>bootable</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>org.springframework.boot</groupId>
