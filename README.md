@@ -9,15 +9,15 @@ A web application for generating chemical structure depictions from SMILES.
 An image is available on DockerHub, [https://hub.docker.com/r/simolecule/cdkdepict/](https://hub.docker.com/r/simolecule/cdkdepict/). To launch a CDK Depict web serivce running on 8081:
 
 ```
-$ docker run -p 8081:8080 simolecule/cdkdepict:1.6
+$ docker run -p 8081:8080 simolecule/cdkdepict:latest
 ```
 
 #### Prepacked release
 
-You can download prebuilt releases from GitHub:
+You can download prebuilt release from GitHub, this is a runnable WAR and will
+launch a standalone server using Spring Boot:
  
  * [`cdkdepict-1.9.2.war`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-1.9.2.war)
- * [`cdkdepict-1.9.2.jar`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-1.9.2.jar)
 
 #### Build
 
@@ -31,17 +31,16 @@ TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded serve
 
 ```
 $ target/cdkdepict-1.9.2.war
-$ target/cdkdepict-1.9.2.jar
 ```
 
-#### Embedded App
+#### Standalone Bootable App
 
 When launching the embedded application the HTTP port is optional (default: 8080). 
 Run the following command and access the site 'http://localhost:8081' by web
 browser.
 
 ```
-$ java -jar target/cdkdepict-1.9.2.jar -httpPort 8081
+$ java -Dserver.port=8081 -jar target/cdkdepict-1.9.2.war
 ```
 
 #### Caching
