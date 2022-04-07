@@ -37,12 +37,13 @@ import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupKey;
 import org.openscience.cdk.sgroup.SgroupType;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
-import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smarts.SmartsPattern;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -1096,6 +1097,8 @@ public class DepictController {
                                   new HttpHeaders(),
                                   HttpStatus.BAD_REQUEST);
     } else {
+      ex.printStackTrace();
+      LoggerFactory.getLogger(DepictController.class).error("Unexpected Error: " + ex);
       return new ResponseEntity<>("<!DOCTYPE html><html><title>500 - Internal Server Error</title><body><div>" +
                                   "<h1>" + ex.getClass().getSimpleName() + "</h1>" +
                                   ex.getMessage() +

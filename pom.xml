@@ -16,7 +16,7 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.7.1</cdk.version>
+    <cdk.version>2.8-SNAPSHOT</cdk.version>
   </properties>
   <developers>
     <developer>

@@ -141,6 +141,8 @@ function handle_img_error(img) {
   $.ajax($(img).attr('src')).error(function(r){
     reason = r.responseText;
     var tempDom = $('<output>').append($.parseHTML(reason));
-    $(img).parent().html($('<div class="error">').append($('div', tempDom).html()));
+    console.log($('div', tempDom).html());
+    $(img).parent().parent().html($('<div class="error-mesg">').append($('div', tempDom).html()));
+    $(img).parent().parent().addClass("error");
   });
 }

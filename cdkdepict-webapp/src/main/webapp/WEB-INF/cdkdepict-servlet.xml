@@ -10,7 +10,5 @@
         http://www.springframework.org/schema/context/spring-context-4.0.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
-    <mvc:resources mapping="/**" location="/WEB-INF/static/" />
     <context:component-scan base-package="org.openscience.cdk.app"/>
-    <mvc:annotation-driven/>
 </beans>

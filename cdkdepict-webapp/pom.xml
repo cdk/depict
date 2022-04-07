@@ -41,28 +41,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.tomcat.maven</groupId>
-        <artifactId>tomcat7-maven-plugin</artifactId>
-        <version>2.1</version>
-        <executions>
-          <execution>
-            <id>tomcat-run</id>
-            <goals>
-              <goal>exec-war-only</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <finalName>${project.name}-${project.version}.jar</finalName>
-              <path>/</path>
-              <attachArtifactClassifier>boot
-              </attachArtifactClassifier>
-              <attachArtifactClassifierType>jar
-              </attachArtifactClassifierType>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
@@ -81,6 +59,71 @@
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <!-- Create a "bootable" WAR using Spring Boot, this is slightly larger
+           but can safely be deployed to a normal TomCat server as well -->
+      <id>bootable</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+          <version>2.6.6</version>
+          <scope>provided</scope>
+          <exclusions>
+            <exclusion>
+              <artifactId>logback-classic</artifactId>
+              <groupId>ch.qos.logback</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>log4j-to-slf4j</artifactId>
+              <groupId>org.apache.logging.log4j</groupId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>2.17.1</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>src/main/spring-boot</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+              <mainClass>org.openscience.cdk.app.Application</mainClass>
+              <layout>WAR</layout>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>repackage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>ossrh</id>
       <build>

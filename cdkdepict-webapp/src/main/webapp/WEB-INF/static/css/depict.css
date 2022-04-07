@@ -169,19 +169,23 @@ i.icon {
   text-shadow: 0 0 3px yellow;
 }
 
-.error {
+.error img {
+  display: none;
+}
+
+.error-mesg {
   color: red;
   font-size: 9pt;
   text-align: left;
   overflow: hidden;
 }
 
-.error h1 {
+..error-mesg h1 {
   font-size: 1.1em;
   margin: 0;
 }
 
-.error pre {
+..error-mesg pre {
   font-size: 6pt;
   font-family: Courier, 'Fixed Width';
 }
