@@ -1,4 +1,4 @@
-FROM openjdk:8u151-jre-alpine
+FROM openjdk:8u212-jre-alpine
 
 # we need a font! DejaVu does fine but we only want the Sans-Serif one
 RUN apk add --no-cache ttf-dejavu && \
