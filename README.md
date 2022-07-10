@@ -40,7 +40,7 @@ Run the following command and access the site 'http://localhost:8081' by web
 browser.
 
 ```
-$ java -Dserver.port=8081 -jar target/cdkdepict-1.9.2.war
+$ java -Dserver.port=8081 -jar  ./cdkdepict-webapp/target/cdkdepict-webapp-1.9.2.war
 ```
 
 #### Caching
