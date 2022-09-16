@@ -10,4 +10,4 @@ RUN apk add --no-cache ttf-dejavu && \
     /usr/share/fonts/ttf-dejavu/DejaVuMath*
 COPY cdkdepict.war .
 EXPOSE 8080
-ENTRYPOINT ["java",  "-D=server.port=8080", "-jar", "cdkdepict.war"]
+ENTRYPOINT ["java",  "-Dserver.port=8080", "-jar", "cdkdepict.war"]
