@@ -1,11 +1,18 @@
-Build
+Build from source
+=====
+To build the 'cdk/depict' image directly from source (including the MAVEN build)
+
+	$ docker build -t cdkdepict -f Dockerfile .
+
+
+Build from a local jar
 =====
 
-To build the 'cdk/depict' container copy the JAR file built with MAVEN 
+To build the 'cdk/depict' image, copy the JAR file built with MAVEN 
 to the directory with the Docker file.
 
 	$ cp ../cdkdepict-webapp/target/cdkdepict*.war cdkdepict.war
-	$ docker build -t cdkdepict -f Dockerfile .
+	$ docker build -t cdkdepict -f Dockerfile_dev .
 
 Alternatively run the 'build.sh' script.
 
