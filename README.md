@@ -17,7 +17,7 @@ $ docker run -p 8081:8080 simolecule/cdkdepict:latest
 You can download prebuilt release from GitHub, this is a runnable WAR and will
 launch a standalone server using Spring Boot:
  
- * [`cdkdepict-1.9.2.war`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-1.9.2.war)
+ * [`cdkdepict-webapp-1.9.2.war`](https://github.com/cdk/depict/releases/download/1.9.2/cdkdepict-webapp-1.9.2.war)
 
 #### Build
 
