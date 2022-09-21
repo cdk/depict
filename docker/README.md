@@ -3,13 +3,13 @@
 To build the 'cdk/depict' image directly from source (including the MAVEN build)
 
 ```
-docker/$ docker build -t cdkdepict -f Dockerfile .
+docker/$ docker build -t cdkdepict -f Dockerfile ..
 ```
 
 or from the project main directory:
 
 ```
-$ docker build -t cdkdepict -f docker/Dockerfile ..
+$ docker build -t cdkdepict -f docker/Dockerfile .
 ```
 
 
