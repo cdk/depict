@@ -18,6 +18,7 @@ CC1(OB(OC1(C)C)B1OC(C(O1)(C)C)(C)C)C	Bis(pinacolato)diboron
 BrCc1ccccc1	BnBr
 CC(C)(C)OC(=O)OC(=O)OC(C)(C)C	Boc2O
 BrBr	Br2
+ClCCCl	(ClCH2)2
 BrC(Br)(Br)Br	CBr4
 ClC(Cl)(Cl)Cl	CCl4
 O=C(n1ccnc1)n1ccnc1	CDI
@@ -48,6 +49,7 @@ C1CN=C2CCCCCN2C1	DBU
 C(=NC1CCCCC1)=NC1CCCCC1	DCC
 CO.ClCCl	DCM MeOH
 ClCCl	DCM
+CC[Zn]CC	Et2Zn
 N#CC1=C(C(C(=C(C1=O)Cl)Cl)=O)C#N	DDQ
 CCOC(=O)N=NC(=O)OCC	DEAD
 CC(C)OC(=O)N=NC(=O)OC(C)C	DIAD
