@@ -25,6 +25,7 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IStereoElement;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.io.MDLV3000Reader;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.SymbolVisibility;
@@ -292,7 +293,7 @@ public class DepictController {
                                           });
     }
 
-    final boolean        isRxn = !smi.contains("V2000") && isRxnSmi(smi);
+    final boolean        isRxn = !smi.contains("V2000") && !smi.contains("V3000") && isRxnSmi(smi);
     final boolean        isRgp = smi.contains("RG:");
     IReaction            rxn   = null;
     IAtomContainer       mol   = null;
@@ -904,6 +905,12 @@ public class DepictController {
   private IAtomContainer loadMol(String str) throws CDKException {
     if (str.contains("V2000")) {
       try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
+        return mdlr.read(SilentChemObjectBuilder.getInstance().newAtomContainer());
+      } catch (CDKException | IOException e3) {
+        throw new CDKException("Could not parse input");
+      }
+    } else if (str.contains("V3000")) {
+      try (MDLV3000Reader mdlr = new MDLV3000Reader(new StringReader(str))) {
         return mdlr.read(SilentChemObjectBuilder.getInstance().newAtomContainer());
       } catch (CDKException | IOException e3) {
         throw new CDKException("Could not parse input");
