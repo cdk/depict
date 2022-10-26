@@ -87,6 +87,9 @@ function update() {
   if (input.indexOf("V2000") >= 0 && input.indexOf("M  END") >= 0) {
     inputs = input.split("$$$$\n");
     result.append(renderCTAB(inputs, opts));
+  } else if (input.indexOf("V3000") >= 0 && input.indexOf("M  END") >= 0) {
+    inputs = input.split("$$$$\n");
+    result.append(renderCTAB(inputs, opts));
   } else {
     inputs = input.split("\n");
     result.append(renderSMILES(inputs, opts));
