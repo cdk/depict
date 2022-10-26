@@ -41,6 +41,7 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
+import org.openscience.cdk.stereo.Stereocenters;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
@@ -497,38 +498,65 @@ public class DepictController {
   }
 
   private void annotateCip(IAtomContainer part) {
-    CdkLabeller.label(part);
+    Stereocenters stereocenters = Stereocenters.of(part);
+    for (IAtom atom : part.atoms()) {
+      if (stereocenters.isStereocenter(atom.getIndex()) &&
+          stereocenters.elementType(atom.getIndex()) == Stereocenters.Type.Tetracoordinate) {
+        atom.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                         "(?)");
+      }
+    }
+    for (IBond bond : part.bonds()) {
+      if (bond.getOrder() != IBond.Order.DOUBLE)
+        continue;
+      int begIdx = bond.getBegin().getIndex();
+      int endIdx = bond.getEnd().getIndex();
+      if (stereocenters.elementType(begIdx) == Stereocenters.Type.Tricoordinate &&
+          stereocenters.elementType(endIdx) == Stereocenters.Type.Tricoordinate &&
+          stereocenters.isStereocenter(begIdx) &&
+          stereocenters.isStereocenter(endIdx)) {
+        bond.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                         "(?)");
+      }
+    }
 
+    // no defined stereo?
+    if (!part.stereoElements().iterator().hasNext())
+      return;
+
+    CdkLabeller.label(part);
     // update to label appropriately for racmic and relative stereochemistry
-    for (IStereoElement<?,?> se : part.stereoElements()) {
-    	if (se.getConfigClass() == IStereoElement.TH &&
-					se.getGroupInfo() != 0) {
-				IAtom focus = (IAtom)se.getFocus();
-				Object label = focus.getProperty(BaseMol.CIP_LABEL_KEY);
-				if (label instanceof Descriptor &&
-						label != Descriptor.ns &&
-						label != Descriptor.Unknown) {
-					if ((se.getGroupInfo() & IStereoElement.GRP_RAC) != 0) {
-						Descriptor inv = null;
-						switch ((Descriptor)label) {
-							case R:
-								inv = Descriptor.S; break;
-							case S:
-								inv = Descriptor.R; break;
-						}
-						if (inv != null)
-							focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + inv.name());
-					} else if ((se.getGroupInfo() & IStereoElement.GRP_REL) != 0) {
-            switch ((Descriptor)label) {
+    for (IStereoElement<?, ?> se : part.stereoElements()) {
+      if (se.getConfigClass() == IStereoElement.TH &&
+          se.getGroupInfo() != 0) {
+        IAtom focus = (IAtom) se.getFocus();
+        Object label = focus.getProperty(BaseMol.CIP_LABEL_KEY);
+        if (label instanceof Descriptor &&
+            label != Descriptor.ns &&
+            label != Descriptor.Unknown) {
+          if ((se.getGroupInfo() & IStereoElement.GRP_RAC) != 0) {
+            Descriptor inv = null;
+            switch ((Descriptor) label) {
+              case R:
+                inv = Descriptor.S;
+                break;
+              case S:
+                inv = Descriptor.R;
+                break;
+            }
+            if (inv != null)
+              focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + inv.name());
+          } else if ((se.getGroupInfo() & IStereoElement.GRP_REL) != 0) {
+            switch ((Descriptor) label) {
               case R:
               case S:
                 focus.setProperty(BaseMol.CIP_LABEL_KEY, label.toString() + "*");
                 break;
             }
-					}
-				}
-			}
-		}
+          }
+        }
+      }
+    }
 
     for (IAtom atom : part.atoms()) {
       if (atom.getProperty(BaseMol.CONF_INDEX) != null)
