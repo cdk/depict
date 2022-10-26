@@ -515,8 +515,11 @@ public class DepictController {
           stereocenters.elementType(endIdx) == Stereocenters.Type.Tricoordinate &&
           stereocenters.isStereocenter(begIdx) &&
           stereocenters.isStereocenter(endIdx)) {
-        bond.setProperty(StandardGenerator.ANNOTATION_LABEL,
-                         "(?)");
+        // only if not in a small ring <7
+        if (Cycles.smallRingSize(bond, 7) == 0) {
+          bond.setProperty(StandardGenerator.ANNOTATION_LABEL,
+                           "(?)");
+        }
       }
     }
 
