@@ -67,7 +67,7 @@ $ docker run -p 8180:8080 cdkdepict
 
  * [Spring](http://spring.io/)
  * [Chemistry Development Kit](http://github.com/cdk/cdk)
- * [Centres](http://github.com/simolecule/cdkdepict)
+ * [Centres](http://github.com/simolecule/centres)
 
 #### License
 
