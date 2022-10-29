@@ -47,7 +47,7 @@ $ java -Dserver.port=8081 -jar  ./cdkdepict-webapp/target/cdkdepict-webapp-1.9.2
 
 When running your own CDK Depict it's useful to enable caching of the generated
 content. To enable caching you need to add the following setting to either the
-WebApp or TomCat's global ``context.xml``:
+WebApp or TomCat's global `context.xml`:
 
 ```
 <Valve className="org.apache.catalina.authenticator.BasicAuthenticator"
