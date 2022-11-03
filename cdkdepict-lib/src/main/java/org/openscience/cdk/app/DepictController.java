@@ -76,6 +76,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 /**
  * Chemical structure depiction controller.
@@ -138,6 +139,7 @@ public class DepictController {
     BGCOLOR("bgcolor", "default"),
     FGCOLOR("fgcolor", "default"),
     SHOWTITLE("showtitle", false),
+    DATIVE("dat", MolOp.DativeBond.Metals),
     ZOOM("zoom", 1.3),
     ROTATE("r", 0),
     FLIP("f", false),
@@ -159,6 +161,16 @@ public class DepictController {
     this.reagents.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
     this.reagents.setContractToSingleLabel(true);
     abbreviations.setContractOnHetero(false);
+  }
+
+  private <T> T getParam(Param param,
+                         Map<String, String> params,
+                         Function<String,T> converter) {
+    T value = (T) param.defaultValue;
+    String str = params.get(param.name);
+    if (str != null && !str.isEmpty())
+      value = converter.apply(str);
+    return value;
   }
 
   private String getString(Param param, Map<String, String> params) {
@@ -304,6 +316,7 @@ public class DepictController {
 
     StructureDiagramGenerator sdg = new StructureDiagramGenerator();
     sdg.setAlignMappedReaction(getBoolean(Param.ALIGNRXNMAP, extra));
+    MolOp.DativeBond doDative = getParam(Param.DATIVE, extra, this::parseDativeParam);
 
     if (isRxn) {
       rxn       = smipar.parseReactionSmiles(smi);
@@ -315,17 +328,17 @@ public class DepictController {
       for (IAtomContainer component : rxn.getReactants().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
         MolOp.perceiveRadicals(component);
-        MolOp.perceiveDativeBonds(component);
+        MolOp.perceiveDativeBonds(component, doDative);
       }
       for (IAtomContainer component : rxn.getProducts().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
         MolOp.perceiveRadicals(component);
-        MolOp.perceiveDativeBonds(component);
+        MolOp.perceiveDativeBonds(component, doDative);
       }
       for (IAtomContainer component : rxn.getAgents().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
         MolOp.perceiveRadicals(component);
-        MolOp.perceiveDativeBonds(component);
+        MolOp.perceiveDativeBonds(component, doDative);
       }
       if (!GeometryUtil.has2DCoordinates(rxn))
         sdg.generateCoordinates(rxn);
@@ -338,7 +351,7 @@ public class DepictController {
                            getInt(Param.SMARTSHITLIM, extra));
       abbreviate(mol, abbr, annotate);
       MolOp.perceiveRadicals(mol);
-      MolOp.perceiveDativeBonds(mol);
+      MolOp.perceiveDativeBonds(mol, doDative);
       if (!GeometryUtil.has2DCoordinates(mol))
         sdg.generateCoordinates(mol);
     }
@@ -451,6 +464,17 @@ public class DepictController {
     }
 
     throw new IllegalArgumentException("Unsupported format.");
+  }
+
+  private MolOp.DativeBond parseDativeParam(String s) {
+    if (s == null || s.isEmpty())
+      return null;
+    switch (s.toLowerCase(Locale.ROOT)) {
+      case "y": return MolOp.DativeBond.Always;
+      case "m": return MolOp.DativeBond.Metals;
+      case "n": return MolOp.DativeBond.Never;
+      default: return null;
+    }
   }
 
   private void rotate(IAtomContainer mol, int rotate) {

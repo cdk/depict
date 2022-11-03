@@ -21,7 +21,7 @@ class MolOpTest {
   void NO2() throws InvalidSmilesException {
     SmilesParser   smipar = new SmilesParser(SilentChemObjectBuilder.getInstance());
     IAtomContainer mol    = smipar.parseSmiles("[Co][N+]([O-])(=O)");
-    MolOp.perceiveDativeBonds(mol);
+    MolOp.perceiveDativeBonds(mol, MolOp.DativeBond.Always);
     int count = 0;
     for (IBond bond : mol.bonds()) {
       if (bond.getDisplay() != IBond.Display.Solid)
@@ -34,7 +34,7 @@ class MolOpTest {
   void NO3() throws InvalidSmilesException {
     SmilesParser   smipar = new SmilesParser(SilentChemObjectBuilder.getInstance());
     IAtomContainer mol    = smipar.parseSmiles("[O-][N+]([O-])=O");
-    MolOp.perceiveDativeBonds(mol);
+    MolOp.perceiveDativeBonds(mol, MolOp.DativeBond.Always);
     int count = 0;
     for (IBond bond : mol.bonds()) {
       if (bond.getDisplay() != IBond.Display.Solid)
