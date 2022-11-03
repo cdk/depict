@@ -139,6 +139,7 @@ public class DepictController {
     BGCOLOR("bgcolor", "default"),
     FGCOLOR("fgcolor", "default"),
     SHOWTITLE("showtitle", false),
+    ARROW("arw", IReaction.Direction.FORWARD),
     DATIVE("dat", MolOp.DativeBond.Metals),
     ZOOM("zoom", 1.3),
     ROTATE("r", 0),
@@ -320,6 +321,10 @@ public class DepictController {
 
     if (isRxn) {
       rxn       = smipar.parseReactionSmiles(smi);
+
+      if (rxn.getDirection() == IReaction.Direction.FORWARD)
+        rxn.setDirection(getParam(Param.ARROW, extra, this::parseArrowParam));
+
       highlight = findHits(getString(Param.SMARTSQUERY, extra),
                            rxn,
                            mol,
@@ -473,6 +478,18 @@ public class DepictController {
       case "y": return MolOp.DativeBond.Always;
       case "m": return MolOp.DativeBond.Metals;
       case "n": return MolOp.DativeBond.Never;
+      default: return null;
+    }
+  }
+
+  private IReaction.Direction parseArrowParam(String s) {
+    if (s == null || s.isEmpty())
+      return null;
+    switch (s.toLowerCase(Locale.ROOT)) {
+      case "equ": return IReaction.Direction.BIDIRECTIONAL;
+      case "ngo": return IReaction.Direction.NO_GO;
+      case "ret": return IReaction.Direction.RETRO_SYNTHETIC;
+      case "res": return IReaction.Direction.RESONANCE;
       default: return null;
     }
   }
