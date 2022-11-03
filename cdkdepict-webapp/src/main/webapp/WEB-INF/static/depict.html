@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>CDK Depict</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="stylesheet" type="text/css" href="css/depict.css">
   <link rel="stylesheet" type="text/css" href="css/Glyphter.css">
   <link rel="stylesheet"
@@ -16,12 +16,12 @@
 <div class="center" style="background: none; margin-top: 0; margin-bottom: -80px; text-align: left; font-size: 40pt; font-weight: bold; color: #fff;">
   <img src="img/depict-logo-cutout-white.svg" height="80px"/>
 </div>
-<div class="center">  
-  <div class="header"> 
+<div class="center">
+  <div class="header">
     Generate depictions of molecules and reactions from <a href="https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system">SMILES</a> or <a href="https://en.wikipedia.org/wiki/Chemical_table_file">SDF</a>.
-           <a style="position: absolute; right: 0; top: 0;"
-          href="https://github.com/cdk/depict"><img
-           src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    <a style="position: absolute; right: 0; top: 0;"
+       href="https://github.com/cdk/depict"><img
+            src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
   </div>
   <textarea id="input" onkeyup="update()" autofocus>CN1C=NC2=C1C(=O)N(C(=O)N2C)C caffeine
 [Cs+].[O-]C(=O)[O-].[Cs+] Cs2CO3
@@ -76,15 +76,39 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
     <i id="more-opts"
        title="More Options"
        onclick="toggleExtraOpts();"
-       class="fas fa-ellipsis-h icon"></i>    
+       class="fas fa-ellipsis-h icon"></i>
   </div>
   <div id="depict_extra_opts">
     <table class="grid" style="text-align: left;">
       <tr>
-        <th>Zoom</th>
+        <th title="Change the default reaction arrow type">Reaction</th>
+        <td>
+          <select name="arw" onchange="update()">
+            <option value="" selected>Plain</option>
+            <option value="EQU">Equilibrium</option>
+            <option value="NGO">No Go</option>
+            <option value="RET">Retro Synthetic</option>
+            <option value="RES">Resonance</option>
+          </select>
+        </td>
+        <th title="Change if dative bonds are automatically perceived or not">Dative Bonds</th>
+        <td>
+          <select name="dat" onchange="update()">
+            <option value="y">Always</option>
+            <option value="m" selected>Metal Only</option>
+            <option value="n">Never</option>
+          </select>
+        </td>
+        <th title="Render the title inside the sketch rather than HTML">Embed Title</th>
+        <td>
+          <input type="checkbox" name="showtitle" onchange="update()">
+        </td>
+      </tr>
+      <tr>
+        <th title="Change the overall size of the depictions">Zoom</th>
         <td>
           <input onchange="update()" name="zoom" type="range" min="10" max="500"
-                 step="5" value="125">
+                 step="5" value="130">
         </td>
         <th>Rotate</th>
         <td>
@@ -96,18 +120,12 @@ CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterifi
           <input type="checkbox" name="flip" onchange="update()">
         </td>
       </tr>
-      <tr>
-        <th>Embed Title</th>
-        <td>
-          <input type="checkbox" name="showtitle" onchange="update()">
-        </td>
-      </tr>
     </table>
   </div>
   <div id="result">
   </div>
   <div class="footer">
-    Built with the <a href="https://www.github.com/cdk/cdk">Chemistry Development Kit</a>. Depict v${project.version}, CDK v${cdk.version}.
+    Built with the <a href="https://www.github.com/cdk/cdk">Chemistry Development Kit</a>. Depict v1.9.2, CDK v2.7.1.
   </div>
 </div>
 <script type="text/javascript">
