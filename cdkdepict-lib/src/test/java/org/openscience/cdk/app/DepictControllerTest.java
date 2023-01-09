@@ -4,20 +4,16 @@
 
 package org.openscience.cdk.app;
 
-import org.junit.Test;
-import org.openscience.cdk.exception.InvalidSmilesException;
-import org.openscience.cdk.silent.SilentChemObjectBuilder;
-import org.openscience.cdk.smiles.SmilesParser;
+import org.junit.jupiter.api.Test;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.awt.*;
+import java.awt.Color;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
-public class DepictControllerTest {
+class DepictControllerTest {
 
   @Test
-  public void getColor() throws Exception {
+  void getColor() throws Exception {
     Color color = DepictController.getColor("#ff00ff");
     assertThat(color.getRed(), is(255));
     assertThat(color.getGreen(), is(0));
@@ -26,7 +22,7 @@ public class DepictControllerTest {
   }
 
   @Test
-  public void getColorTruncated() throws Exception {
+  void getColorTruncated() throws Exception {
     Color color = DepictController.getColor("#ff00f");
     assertThat(color.getRed(), is(255));
     assertThat(color.getGreen(), is(0));
@@ -35,7 +31,7 @@ public class DepictControllerTest {
   }
 
   @Test
-  public void getColorTooLong() throws Exception {
+  void getColorTooLong() throws Exception {
     Color color = DepictController.getColor("#ff00ffffff");
     assertThat(color.getRed(), is(255));
     assertThat(color.getGreen(), is(0));
