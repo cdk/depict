@@ -5,16 +5,17 @@ COPY cdkdepict-webapp cdkdepict-webapp
 COPY pom.xml pom.xml
 RUN mvn clean package
 
-FROM openjdk:8u212-jre-alpine as runtime
+FROM eclipse-temurin:8u352-b08-jre-alpine as runtime
 
 # we need a font! DejaVu does fine but we only want the Sans-Serif one
-RUN apk add --no-cache ttf-dejavu && \
-    rm /usr/share/fonts/ttf-dejavu/DejaVuSerif* \
-    /usr/share/fonts/ttf-dejavu/DejaVuLGC* \
-    /usr/share/fonts/ttf-dejavu/DejaVuSansCond* \
-    /usr/share/fonts/ttf-dejavu/DejaVuSansMono* \
-    /usr/share/fonts/ttf-dejavu/DejaVuSans-* \
-    /usr/share/fonts/ttf-dejavu/DejaVuMath*
+RUN apk add --no-cache libgcc && \
+    rm /usr/share/fonts/dejavu/DejaVuSerif* \
+    /usr/share/fonts/dejavu/DejaVuLGC* \
+    /usr/share/fonts/dejavu/DejaVuSansCond* \
+    /usr/share/fonts/dejavu/DejaVuSansMono* \
+    /usr/share/fonts/dejavu/DejaVuSans-* \
+    /usr/share/fonts/dejavu/DejaVuMath*
+
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/cdkdepict-webapp/target/cdkdepict-*.war cdkdepict.war
 RUN chgrp -R 0 /usr/src/app && chmod -R g=u /usr/src/app
