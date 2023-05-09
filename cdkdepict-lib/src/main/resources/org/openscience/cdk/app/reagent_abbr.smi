@@ -44,6 +44,8 @@ I[Cu]	CuI
 [I-].[Cu+]	CuI
 O=S1(O[Cu]O1)=O	CuSO4
 [O-]S([O-])(=O)=O.[Cu+2]	CuSO4
+O=C(O[Cu])c1cccs1	CuTC
+O=C([O-])c1cccs1.[Cu+]	CuTC
 CCN(CC)S(F)(F)F	DAST
 C1CN=C2CCCCCN2C1	DBU
 C(=NC1CCCCC1)=NC1CCCCC1	DCC
