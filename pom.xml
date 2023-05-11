@@ -16,7 +16,7 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.8</cdk.version>
+    <cdk.version>2.9-SNAPSHOT</cdk.version>
     <junit.version>5.9.1</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <spring-webmvc.version>5.3.24</spring-webmvc.version>
