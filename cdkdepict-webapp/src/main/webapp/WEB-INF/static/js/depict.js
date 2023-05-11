@@ -77,7 +77,9 @@ function update() {
               'sma':       $("input[name='smarts']").val(),
               'hdisp':     $("select[name='hdisp'] option:selected").val(),
               'showtitle': $("input[name='showtitle']").is(':checked'),
-              'abbr':      $("select[name='abbr'] option:selected").val()
+              'abbr':      $("select[name='abbr'] option:selected").val(),
+              'arw':       $("select[name='arw'] option:selected").val(),
+              'dat':       $("select[name='dat'] option:selected").val()
               };
 
   result.removeClass().addClass(opts.style);
@@ -103,17 +105,22 @@ function depict_url(opts, smiles, fmt, w, h) {
 	  url += '&w=' + w + '&h=' + h;
 	url += '&abbr=' + opts.abbr;
 	url += '&hdisp=' + opts.hdisp;
-	url += '&showtitle=' + opts.showtitle;
+	if (opts.showtitle)
+		url += '&showtitle=' + opts.showtitle;
 	if (opts.sma)
 	  url += '&sma=' + encodeURIComponent(opts.sma);
-	if (opts.zoom)
+	if (opts.zoom && opts.zoom !== 130)
       url += '&zoom=' + encodeURIComponent(opts.zoom/100);
     if (opts.annotate)
      url += '&annotate=' + encodeURIComponent(opts.annotate);
-  if (opts.flip)
-    url += '&f=1';
-  if (opts.rotate)
-    url += '&r=' + encodeURIComponent(opts.rotate);
+    if (opts.arw)
+      url += '&arw=' + encodeURIComponent(opts.arw);
+    if (opts.dat !== 'm')
+      url += '&dat=' + encodeURIComponent(opts.dat);
+  	if (opts.flip)
+    	url += '&f=1';
+  	if (opts.rotate)
+    	url += '&r=' + encodeURIComponent(opts.rotate);
 	return url;    
 }
 

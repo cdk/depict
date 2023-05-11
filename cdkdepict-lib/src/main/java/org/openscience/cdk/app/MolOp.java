@@ -23,52 +23,56 @@ public class MolOp {
     return v;
   }
 
-  private static boolean isDativeDonor(IAtom a) {
+  private static boolean isDativeDonor(IAtom a, DativeBond opt) {
     switch (a.getAtomicNumber()) {
-      case 7:
-      case 15:
+      case IAtom.N:
+      case IAtom.P:
         return a.getFormalCharge() == 0 && calcValence(a) == 4;
-      case 8:
+      case IAtom.O:
         return a.getFormalCharge() == 0 && calcValence(a) == 3;
       default:
         return false;
     }
   }
 
-  private static boolean isDativeAcceptor(IAtom a) {
+  private static boolean isDativeAcceptor(IAtom a, DativeBond opt) {
     if (Elements.isMetal(a))
       return true;
+    if (opt == DativeBond.Metals)
+      return false;
     switch (a.getAtomicNumber()) {
-      case 5:
+      case IAtom.B:
         return a.getFormalCharge() == 0 && calcValence(a) == 4;
-      case 8:
+      case IAtom.O:
         return a.getFormalCharge() == 0 && calcValence(a) == 1;
       default:
         return false;
     }
   }
 
-  private static boolean isPosDativeDonor(IAtom a) {
+  private static boolean isPosDativeDonor(IAtom a, DativeBond opt) {
     switch (a.getAtomicNumber()) {
-      case 7:
-      case 15:
+      case IAtom.N:
+      case IAtom.P:
         return a.getFormalCharge() == +1 && calcValence(a) == 4;
-      case 8:
+      case IAtom.O:
         return a.getFormalCharge() == +1 && calcValence(a) == 3;
       default:
         return false;
     }
   }
 
-  private static boolean isNegDativeAcceptor(IAtom a) {
+  private static boolean isNegDativeAcceptor(IAtom a, DativeBond opt) {
     if (a.getFormalCharge() != -1)
       return false;
     if (Elements.isMetal(a))
       return true;
+    if (opt == DativeBond.Metals)
+      return false;
     switch (a.getAtomicNumber()) {
-      case 5:
+      case IAtom.B:
         return calcValence(a) == 4;
-      case 8:
+      case IAtom.O:
         return calcValence(a) == 1;
       default:
         return false;
@@ -110,15 +114,23 @@ public class MolOp {
     }
   }
 
-  public static void perceiveDativeBonds(IAtomContainer mol) {
+  enum DativeBond {
+    Always,
+    Metals,
+    Never
+  };
+
+  public static void perceiveDativeBonds(IAtomContainer mol, DativeBond opt) {
+    if (opt == DativeBond.Never)
+      return;
     for (IBond bond : mol.bonds()) {
       IAtom beg = bond.getBegin();
       IAtom end = bond.getEnd();
-      if (isPosDativeDonor(end) && isNegDativeAcceptor(beg)) {
+      if (isPosDativeDonor(end, opt) && isNegDativeAcceptor(beg, opt)) {
         bond.setDisplay(IBond.Display.ArrowBeg);
         beg.setFormalCharge(beg.getFormalCharge() + 1);
         end.setFormalCharge(end.getFormalCharge() - 1);
-      } else if (isPosDativeDonor(beg) && isNegDativeAcceptor(end)) {
+      } else if (isPosDativeDonor(beg, opt) && isNegDativeAcceptor(end, opt)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
         beg.setFormalCharge(beg.getFormalCharge() - 1);
         end.setFormalCharge(end.getFormalCharge() + 1);
@@ -127,9 +139,9 @@ public class MolOp {
     for (IBond bond : mol.bonds()) {
       IAtom beg = bond.getBegin();
       IAtom end = bond.getEnd();
-      if (isDativeDonor(end) && isDativeAcceptor(beg)) {
+      if (isDativeDonor(end, opt) && isDativeAcceptor(beg, opt)) {
         bond.setDisplay(IBond.Display.ArrowBeg);
-      } else if (isDativeDonor(beg) && isDativeAcceptor(end)) {
+      } else if (isDativeDonor(beg, opt) && isDativeAcceptor(end, opt)) {
         bond.setDisplay(IBond.Display.ArrowEnd);
       }
     }
