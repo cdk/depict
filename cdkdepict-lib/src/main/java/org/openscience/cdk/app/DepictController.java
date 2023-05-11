@@ -1091,7 +1091,7 @@ public class DepictController {
       if (mol != null) {
         for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(mol)
                                                             .limit(limit)
-                                                            .uniqueAtoms()
+                                                            .exclusiveAtoms()
                                                             .toAtomBondMap()) {
           for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
             highlight.add(e.getValue());
@@ -1100,7 +1100,7 @@ public class DepictController {
       } else if (rxn != null) {
         for (Map<IChemObject, IChemObject> m : smartsPattern.matchAll(rxn)
                                                             .limit(limit)
-                                                            .uniqueAtoms()
+                                                            .exclusiveAtoms()
                                                             .toAtomBondMap()) {
           for (Map.Entry<IChemObject, IChemObject> e : m.entrySet()) {
             highlight.add(e.getValue());
