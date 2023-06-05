@@ -19,7 +19,7 @@
     <cdk.version>2.9-SNAPSHOT</cdk.version>
     <junit.version>5.9.1</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <spring-webmvc.version>5.3.24</spring-webmvc.version>
+    <spring-webmvc.version>5.3.27</spring-webmvc.version>
   </properties>
   <developers>
     <developer>
