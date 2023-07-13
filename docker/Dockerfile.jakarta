@@ -10,7 +10,6 @@ FROM eclipse-temurin:17-jre-alpine as runtime
 # we need a font! DejaVu does fine but we only want the Sans-Serif one
 RUN apk add --no-cache libgcc && \
     rm /usr/share/fonts/dejavu/DejaVuSerif* \
-    /usr/share/fonts/dejavu/DejaVuLGC* \
     /usr/share/fonts/dejavu/DejaVuSansCond* \
     /usr/share/fonts/dejavu/DejaVuSansMono* \
     /usr/share/fonts/dejavu/DejaVuSans-* \
