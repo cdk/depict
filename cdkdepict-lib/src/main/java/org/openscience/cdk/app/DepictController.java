@@ -524,9 +524,35 @@ public class DepictController {
     GeometryUtil.rotate(mol, c, Math.toRadians(rotate));
   }
 
+  private void flip(IBond bond) {
+    switch (bond.getDisplay()) {
+      case WedgeBegin:      bond.setDisplay(IBond.Display.WedgedHashBegin); break;
+      case WedgeEnd:        bond.setDisplay(IBond.Display.WedgedHashEnd); break;
+      case WedgedHashBegin: bond.setDisplay(IBond.Display.WedgeBegin); break;
+      case WedgedHashEnd:   bond.setDisplay(IBond.Display.WedgeEnd); break;
+      case Bold:            bond.setDisplay(IBond.Display.Hash); break;
+      case Hash:            bond.setDisplay(IBond.Display.Bold); break;
+    }
+  }
+
   private void flip(IAtomContainer mol) {
-    for (IAtom atom : mol.atoms())
+    for (IAtom atom : mol.atoms()) {
       atom.getPoint2d().x = -atom.getPoint2d().x;
+    }
+    for (IStereoElement<?,?> se : mol.stereoElements()) {
+      if (se.getConfigClass() == IStereoElement.Tetrahedral) {
+        for (IBond bond : ((IAtom) se.getFocus()).bonds())
+          flip(bond);
+      } else if (se.getConfigClass() == IStereoElement.Allenal) {
+        IAtom[] ends = ExtendedTetrahedral.findTerminalAtoms(mol, (IAtom) se.getFocus());
+        for (IBond bond : ends[0].bonds())
+          flip(bond);
+        for (IBond bond : ends[1].bonds())
+          flip(bond);
+      }
+      // Note: inorganic stereo does not flip, but the layout might be wrong if chiral.
+      // Atropisomers not currently possiblet to input via SMILES
+    }
   }
 
   private DepictionGenerator withBgFgColors(
