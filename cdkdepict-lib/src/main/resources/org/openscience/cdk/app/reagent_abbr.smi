@@ -116,6 +116,7 @@ F[K]	KF
 [F-].[K+]	KF
 O=P(O)(O)O[K]	KH2PO4
 [O-]P(=O)(O)O.[K+]	KH2PO4
+C[Si](C)(C)N[Si](C)(C)C	HMDS
 C[Si](C)(C)N([Si](C)(C)C)[K]	KHMDS
 C[Si](C)(C)[N-][Si](C)(C)C.[K+]	KHMDS
 O=S(=O)(O)O[K]	KHSO4
@@ -170,7 +171,7 @@ CS(=O)(=O)Cl	MsCl
 N#N	N2
 NN	N2H2
 O=C1CCC(N1Br)=O	NBS
-CCN(CC)CC	NEt3
+CCN(CC)CC	Et3N
 NO	NH2OH
 Cl[NH4]	NH4Cl
 N.Cl	NH4Cl
@@ -287,8 +288,11 @@ CC(C)O[Ti](OC(C)C)(OC(C)C)OC(C)C	Ti(OiPr)4
 Cl[Ti](Cl)(Cl)Cl	TiCl4
 [Cl-].[Cl-].[Cl-].[Cl-].[Ti+4]	TiCl4
 Cc1ccccc1	Tol
-Cc1ccccc1	Toluene
-O=C(OC(Cl)(Cl)Cl)OC(Cl)(Cl)Cl	Triphosgene
+CCCCCC	hexane
+O=C(OC(Cl)(Cl)Cl)OC(Cl)(Cl)Cl	BTC
+OCCSCCO	TDE
+CCCCC(CC)CO 2-EH
+OCCN MEA
 CC1(c2cccc(c2Oc2c(cccc21)P(c1ccccc1)c1ccccc1)P(c1ccccc1)c1ccccc1)C	Xantphos
 CC(C)c1cc(c(c(c1)C(C)C)-c1ccccc1P(C1CCCCC1)C1CCCCC1)C(C)C	Xphos
 N#C[Zn]C#N	Zn(CN)2
@@ -300,7 +304,7 @@ Cl[Zn]Cl	ZnCl2
 I[Zn]I	ZnI2
 [I-].[I-].[Zn+2]	ZnI2
 [Cl-].[Cl-].[Cl-].[Cl-].[Zr+4]	ZrCl4
-CC(C)=O	acetone
+CC(C)=O Me2CO
 C1COCCO1	dioxane
 C1C=CC(C=1)(P(c1ccccc1)c1ccccc1)[Fe]C1(C=CC=C1)P(c1ccccc1)c1ccccc1	dppf
 c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.[Fe+2]	dppf
@@ -318,7 +322,6 @@ CC(C)(C)[Li]	tBuLi
 CC(C)(C)O	tBuOH
 CC(C)(C)O[K]	tBuOK
 CC(C)(C)[O-].[K+]	tBuOK
-Cc1ccccc1	toluene
 
 # Metabolites
 Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O ATP
