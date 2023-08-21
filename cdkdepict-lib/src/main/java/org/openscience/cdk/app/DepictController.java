@@ -123,8 +123,8 @@ public class DepictController {
   private final DepictionGenerator generator = new DepictionGenerator();
   private SmilesParser smipar = new SmilesParser(builder);
 
-  private final Abbreviations abbreviations = new Abbreviations();
-  private final Abbreviations reagents = new Abbreviations();
+  private final Abbreviations groupAbbr = new Abbreviations();
+  private final Abbreviations agentAbbr = new Abbreviations();
 
   private enum Param {
     // match highlighting
@@ -159,11 +159,17 @@ public class DepictController {
   }
 
   public DepictController() throws IOException {
-    this.abbreviations.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
-    this.abbreviations.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
-    this.reagents.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
-    this.reagents.setContractToSingleLabel(true);
-    abbreviations.setContractOnHetero(false);
+    this.groupAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
+    this.agentAbbr.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
+    this.agentAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
+    this.agentAbbr
+            .with(Abbreviations.Option.ALLOW_SINGLETON)
+            .with(Abbreviations.Option.AUTO_CONTRACT_TERMINAL)
+            .without(Abbreviations.Option.AUTO_CONTRACT_HETERO);
+    this.groupAbbr
+            .without(Abbreviations.Option.ALLOW_SINGLETON)
+            .with(Abbreviations.Option.AUTO_CONTRACT_TERMINAL)
+            .without(Abbreviations.Option.AUTO_CONTRACT_HETERO);
   }
 
   private <T> T getParam(Param param,
@@ -341,8 +347,8 @@ public class DepictController {
                                          rxn,
                                          null,
                                          getInt(Param.SMARTSHITLIM, extra));
-        abbreviate(rxn, abbr, annotate);
         highlight.addAll(hits);
+        abbreviate(rxn, abbr, highlight);
         for (IAtomContainer component : rxn.getReactants().atomContainers()) {
           setHydrogenDisplay(component, hDisplayType);
           MolOp.perceiveRadicals(component);
@@ -368,7 +374,7 @@ public class DepictController {
                            null,
                            mol,
                            getInt(Param.SMARTSHITLIM, extra));
-      abbreviate(mol, abbr, annotate);
+      abbreviate(mol, abbr, highlight);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol, doDative);
       if (!GeometryUtil.has2DCoordinates(mol))
@@ -526,12 +532,24 @@ public class DepictController {
 
   private void flip(IBond bond) {
     switch (bond.getDisplay()) {
-      case WedgeBegin:      bond.setDisplay(IBond.Display.WedgedHashBegin); break;
-      case WedgeEnd:        bond.setDisplay(IBond.Display.WedgedHashEnd); break;
-      case WedgedHashBegin: bond.setDisplay(IBond.Display.WedgeBegin); break;
-      case WedgedHashEnd:   bond.setDisplay(IBond.Display.WedgeEnd); break;
-      case Bold:            bond.setDisplay(IBond.Display.Hash); break;
-      case Hash:            bond.setDisplay(IBond.Display.Bold); break;
+      case WedgeBegin:
+        bond.setDisplay(IBond.Display.WedgedHashBegin);
+        break;
+      case WedgeEnd:
+        bond.setDisplay(IBond.Display.WedgedHashEnd);
+        break;
+      case WedgedHashBegin:
+        bond.setDisplay(IBond.Display.WedgeBegin);
+        break;
+      case WedgedHashEnd:
+        bond.setDisplay(IBond.Display.WedgeEnd);
+        break;
+      case Bold:
+        bond.setDisplay(IBond.Display.Hash);
+        break;
+      case Hash:
+        bond.setDisplay(IBond.Display.Bold);
+        break;
     }
   }
 
@@ -539,7 +557,7 @@ public class DepictController {
     for (IAtom atom : mol.atoms()) {
       atom.getPoint2d().x = -atom.getPoint2d().x;
     }
-    for (IStereoElement<?,?> se : mol.stereoElements()) {
+    for (IStereoElement<?, ?> se : mol.stereoElements()) {
       if (se.getConfigClass() == IStereoElement.Tetrahedral) {
         for (IBond bond : ((IAtom) se.getFocus()).bonds())
           flip(bond);
@@ -894,56 +912,47 @@ public class DepictController {
     }
   }
 
-  private boolean add(Set<IAtom> set, Set<IAtom> atomsToAdd) {
-    boolean res = true;
-    for (IAtom atom : atomsToAdd) {
-      if (!set.add(atom))
-        res = false;
-    }
-    return res;
-  }
+  private void abbreviate(IReaction rxn,
+                          String mode,
+                          Set<IChemObject> highlight) {
 
-  private void abbreviate(IReaction rxn, String mode, String annotate) {
+    Map<IAtom, Integer> atomSet = new HashMap<>();
+    for (IChemObject obj : highlight) {
+      if (obj instanceof IAtom)
+        atomSet.put((IAtom) obj, 1);
+    }
+
     Multimap<IAtomContainer, Sgroup> sgroupmap = ArrayListMultimap.create();
     switch (mode.toLowerCase()) {
       case "true":
       case "on":
       case "yes":
+      case "groups+agents":
         for (IAtomContainer mol : rxn.getReactants().atomContainers()) {
-          Set<IAtom> atoms = new HashSet<>();
-          List<Sgroup> newSgroups = new ArrayList<>();
-          for (Sgroup sgroup : abbreviations.generate(mol)) {
-            if (add(atoms, sgroup.getAtoms()))
-              newSgroups.add(sgroup);
-          }
+          groupAbbr.apply(mol, atomSet);
           contractHydrates(mol);
-          sgroupmap.putAll(mol, newSgroups);
         }
         for (IAtomContainer mol : rxn.getProducts().atomContainers()) {
           Set<IAtom> atoms = new HashSet<>();
           List<Sgroup> newSgroups = new ArrayList<>();
-          for (Sgroup sgroup : abbreviations.generate(mol)) {
-            if (add(atoms, sgroup.getAtoms()))
-              newSgroups.add(sgroup);
-          }
+          groupAbbr.apply(mol, atomSet);
           contractHydrates(mol);
-          sgroupmap.putAll(mol, newSgroups);
         }
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          reagents.apply(mol);
-          abbreviations.apply(mol);
+          agentAbbr.apply(mol, atomSet);
           contractHydrates(mol);
         }
         break;
       case "groups":
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          abbreviations.apply(mol);
+          groupAbbr.apply(mol, atomSet);
           contractHydrates(mol);
         }
         break;
       case "reagents":
+      case "agents":
         for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          reagents.apply(mol);
+          agentAbbr.apply(mol, atomSet);
           contractHydrates(mol);
         }
         break;
@@ -982,42 +991,33 @@ public class DepictController {
     }
   }
 
-  private void abbreviate(IAtomContainer mol, String mode, String annotate) {
+  private void abbreviate(IAtomContainer mol,
+                          String mode,
+                          String annotate,
+                          Set<IChemObject> highlight) {
+
+    Map<IAtom, Integer> atomSet = new HashMap<>();
+    for (IChemObject obj : highlight) {
+      if (obj instanceof IAtom)
+        atomSet.put((IAtom) obj, 1);
+    }
+
+    // block abbreviations of mapped atoms which will be coloured if this option is set
+    if ("mapidx".equals(annotate)) {
+      for (IAtom atom : mol.atoms()) {
+        if (atom.getMapIdx() != 0)
+          atomSet.put(atom, 2);
+      }
+    }
+
     switch (mode.toLowerCase()) {
       case "true":
       case "on":
       case "yes":
       case "groups":
         contractHydrates(mol);
-        abbreviations.apply(mol);
+        groupAbbr.apply(mol, atomSet);
         break;
-      case "reagents":
-        contractHydrates(mol);
-        break;
-    }
-    // remove abbreviations of mapped atoms
-    if ("mapidx".equals(annotate)) {
-      List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS);
-      List<Sgroup> filtered = new ArrayList<>();
-      if (sgroups != null) {
-        for (Sgroup sgroup : sgroups) {
-          // turn off display short-cuts
-          if (sgroup.getType() == SgroupType.CtabAbbreviation ||
-                  sgroup.getType() == SgroupType.CtabMultipleGroup) {
-            boolean okay = true;
-            for (IAtom atom : sgroup.getAtoms()) {
-              if (atom.getProperty(CDKConstants.ATOM_ATOM_MAPPING) != null) {
-                okay = false;
-                break;
-              }
-            }
-            if (okay) filtered.add(sgroup);
-          } else {
-            filtered.add(sgroup);
-          }
-        }
-        mol.setProperty(CDKConstants.CTAB_SGROUPS, filtered);
-      }
     }
   }
 
@@ -1169,7 +1169,9 @@ public class DepictController {
    * @param mol molecule
    * @return set of matched atoms and bonds
    */
-  private Set<IChemObject> findHits(final String sma, final IReaction rxn, final IAtomContainer mol,
+  private Set<IChemObject> findHits(final String sma,
+                                    final IReaction rxn,
+                                    final IAtomContainer mol,
                                     final int limit) {
 
     Set<IChemObject> highlight = new HashSet<>();
