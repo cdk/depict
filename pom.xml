@@ -16,9 +16,10 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.9-SNAPSHOT</cdk.version>
+    <cdk.version>2.9</cdk.version>
     <junit.version>5.9.1</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
+    <!-- Note -Pjakarta for Spring 6 (Requires Java 17 and JakartaEE) -->
     <spring-webmvc.version>5.3.27</spring-webmvc.version>
     <spring-boot.version>2.7.12</spring-boot.version>
   </properties>
@@ -159,7 +160,7 @@
       <id>jakarta</id>
       <properties>
         <spring-webmvc.version>6.0.10</spring-webmvc.version>
-        <spring-boot.version>3.1.1</spring-boot.version>
+        <spring-boot.version>3.1.2</spring-boot.version>
       </properties>
       <build>
         <plugins>
