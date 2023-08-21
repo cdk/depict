@@ -23,6 +23,7 @@ import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
+import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.interfaces.IStereoElement;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.MDLV3000Reader;
@@ -45,6 +46,7 @@ import org.openscience.cdk.stereo.Stereocenters;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
+import org.openscience.cdk.tools.manipulator.ReactionSetManipulator;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -309,27 +311,38 @@ public class DepictController {
 
     final boolean        isRxn = !smi.contains("V2000") && !smi.contains("V3000") && isRxnSmi(smi);
     final boolean        isRgp = smi.contains("RG:");
-    IReaction            rxn   = null;
+    IReactionSet         rxns   = null;
     IAtomContainer       mol   = null;
     List<IAtomContainer> mols  = null;
 
-    Set<IChemObject> highlight;
+    Set<IChemObject> highlight = new HashSet<>();
 
     StructureDiagramGenerator sdg = new StructureDiagramGenerator();
     sdg.setAlignMappedReaction(getBoolean(Param.ALIGNRXNMAP, extra));
     MolOp.DativeBond doDative = getParam(Param.DATIVE, extra, this::parseDativeParam);
 
     if (isRxn) {
-      rxn       = smipar.parseReactionSmiles(smi);
+      try {
+        rxns = smipar.parseReactionSetSmiles(smi);
+      } catch (CDKException ex) {
+        SmilesParser smipar2 = new SmilesParser(builder);
+        smipar2.kekulise(false);
+        rxns = smipar2.parseReactionSetSmiles(smi);
+      }
 
+      for (IReaction rxn : rxns.reactions()) {
       if (rxn.getDirection() == IReaction.Direction.FORWARD)
         rxn.setDirection(getParam(Param.ARROW, extra, this::parseArrowParam));
+      }
 
-      highlight = findHits(getString(Param.SMARTSQUERY, extra),
+      highlight = new HashSet<>();
+      for (IReaction rxn : rxns.reactions()) {
+        Set<IChemObject> hits = findHits(getString(Param.SMARTSQUERY, extra),
                            rxn,
-                           mol,
+                                         null,
                            getInt(Param.SMARTSHITLIM, extra));
       abbreviate(rxn, abbr, annotate);
+        highlight.addAll(hits);
       for (IAtomContainer component : rxn.getReactants().atomContainers()) {
         setHydrogenDisplay(component, hDisplayType);
         MolOp.perceiveRadicals(component);
@@ -347,6 +360,7 @@ public class DepictController {
       }
       if (!GeometryUtil.has2DCoordinates(rxn))
         sdg.generateCoordinates(rxn);
+      }
     } else {
       mol = loadMol(smi);
       setHydrogenDisplay(mol, hDisplayType);
@@ -395,8 +409,10 @@ public class DepictController {
         break;
       case "cip":
         if (isRxn) {
+          for (IReaction rxn : rxns.reactions()) {
           for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn)) {
             annotateCip(part);
+          }
           }
         } else {
           annotateCip(mol);
@@ -432,7 +448,7 @@ public class DepictController {
     // reactions are laid out in the main depiction gen
     if (getBoolean(Param.FLIP, extra)) {
       if (isRxn) {
-        for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn))
+        for (IAtomContainer part : ReactionSetManipulator.getAllAtomContainers(rxns))
           flip(part);
       } else
         flip(mol);
@@ -440,7 +456,7 @@ public class DepictController {
     int rotate = getInt(Param.ROTATE, extra);
     if (rotate != 0) {
       if (isRxn) {
-        for (IAtomContainer part : ReactionManipulator.getAllAtomContainers(rxn))
+        for (IAtomContainer part : ReactionSetManipulator.getAllAtomContainers(rxns))
           rotate(part, rotate);
       } else {
         rotate(mol, rotate);
@@ -450,7 +466,7 @@ public class DepictController {
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
     // pre-render the depiction
-    final Depiction depiction = isRxn ? myGenerator.depict(rxn)
+    final Depiction depiction = isRxn ? myGenerator.depict(rxns)
         : isRgp ? myGenerator.depict(mols, mols.size(), 1)
         : myGenerator.depict(mol);
 
