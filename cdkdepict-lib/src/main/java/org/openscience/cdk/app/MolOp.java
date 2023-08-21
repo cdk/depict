@@ -84,6 +84,8 @@ public class MolOp {
       int     v;
       Integer q = atom.getFormalCharge();
       if (q == null) q = 0;
+      if (atom.isAromatic())
+        continue;
       switch (atom.getAtomicNumber()) {
         case 6:
           if (q == 0) {
