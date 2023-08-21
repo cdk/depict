@@ -374,7 +374,7 @@ public class DepictController {
                            null,
                            mol,
                            getInt(Param.SMARTSHITLIM, extra));
-      abbreviate(mol, abbr, highlight);
+      abbreviate(mol, abbr, annotate, highlight);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol, doDative);
       if (!GeometryUtil.has2DCoordinates(mol))
