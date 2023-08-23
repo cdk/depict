@@ -17,6 +17,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cdk.version>2.9</cdk.version>
+    <depict.version>${project.parent.version}</depict.version>
     <junit.version>5.9.1</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <!-- Note -Pjakarta for Spring 6 (Requires Java 17 and JakartaEE) -->
