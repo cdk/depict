@@ -88,6 +88,11 @@ i.icon {
   max-height: 200px;
 }
 
+.chemdiv.scheme {
+  width:      480px;
+  max-width:  480px;
+}
+
 .chemdiv .grid {
   display: grid;
   grid-template-rows: minmax(0, auto) max-content;

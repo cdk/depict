@@ -5,7 +5,7 @@
   <parent>
     <artifactId>cdkdepict</artifactId>
     <groupId>org.openscience.cdk</groupId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.11-SNAPSHOT</version>
   </parent>
   <packaging>war</packaging>
   <modelVersion>4.0.0</modelVersion>
@@ -70,7 +70,7 @@
         <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-web</artifactId>
-          <version>2.7.13</version>
+          <version>${spring-boot.version}</version>
           <scope>provided</scope>
           <exclusions>
             <exclusion>
@@ -112,7 +112,7 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.7.7</version>
+            <version>${spring-boot.version}</version>
             <configuration>
               <mainClass>org.openscience.cdk.app.Application</mainClass>
               <layout>WAR</layout>

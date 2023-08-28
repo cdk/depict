@@ -81,9 +81,11 @@ public class MolOp {
 
   public static void perceiveRadicals(IAtomContainer mol) {
     for (IAtom atom : mol.atoms()) {
-      int     v;
+      int v;
       Integer q = atom.getFormalCharge();
       if (q == null) q = 0;
+      if (atom.isAromatic())
+        continue;
       switch (atom.getAtomicNumber()) {
         case 6:
           if (q == 0) {
@@ -118,7 +120,7 @@ public class MolOp {
     Always,
     Metals,
     Never
-  };
+  }
 
   public static void perceiveDativeBonds(IAtomContainer mol, DativeBond opt) {
     if (opt == DativeBond.Never)

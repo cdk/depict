@@ -125,14 +125,23 @@ function depict_url(opts, smiles, fmt, w, h) {
 }
 
 function generate(opts, smiles, title) {
-    var isrxn  = smiles.indexOf('>') != -1;
+    var isrxn    = smiles.indexOf('>') != -1;
+    var numparts = isrxn ? ((smiles.split('>').length - 1) / 2) : 1;
+
+    var classType = 'molecule';
+    if (isrxn) {
+        if (numparts > 1)
+            classType = 'scheme';
+        else
+            classType = 'reaction';
+    }
 
     var svg_url = depict_url(opts, smiles, 'svg', -1, -1);
     var png_url = depict_url(opts, smiles, 'png', -1, -1);
     var pdf_url = depict_url(opts, smiles, 'pdf', -1, -1);
 
     var $outer = $('<div>').addClass('chemdiv')
-                           .addClass(isrxn ? 'reaction' : 'molecule');
+                           .addClass(classType);
     var $img = $('<div class="img">').append('<span class="valign-helper"></span>')
                                      .append($('<a href="' + svg_url + '">').append($('<img onerror="handle_img_error(this)">').addClass('chemimg').attr('src', svg_url)));
     var $div =  $('<div class="grid">').append($img);
