@@ -144,6 +144,7 @@ public class DepictController {
     ARROW("arw", IReaction.Direction.FORWARD),
     DATIVE("dat", MolOp.DativeBond.Metals),
     ZOOM("zoom", 1.3),
+    RATIO("ratio", 1.1),
     ROTATE("r", 0),
     FLIP("f", false),
     WIDTH("w", -1),
@@ -299,6 +300,8 @@ public class DepictController {
     myGenerator = withBgFgColors(extra, myGenerator);
     myGenerator = myGenerator.withAnnotationScale(0.7)
                              .withAnnotationColor(Color.RED);
+    myGenerator = myGenerator.withParam(StandardGenerator.StrokeRatio.class, getDouble(Param.RATIO, extra));
+
 
     // align rxn maps
     myGenerator = myGenerator.withMappedRxnAlign(getBoolean(Param.ALIGNRXNMAP, extra));
