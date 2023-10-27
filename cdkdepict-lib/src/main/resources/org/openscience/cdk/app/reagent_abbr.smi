@@ -323,6 +323,10 @@ CC(C)(C)O	tBuOH
 CC(C)(C)O[K]	tBuOK
 CC(C)(C)[O-].[K+]	tBuOK
 CC(C)(C)[PH+](C(C)(C)C)C(C)(C)C.F[B-](F)(F)F TTBP·HBF4
+Cl[Pt-2](Cl)(Cl)Cl	PtCl4-2
+Cl[Pt-2](Cl)(Cl)Cl	PtCl6-2
+[K+].[K+].Cl[Pt-2](Cl)(Cl)Cl	K2PtCl4
+[H+].[H+].Cl[Pt-2](Cl)(Cl)(Cl)(Cl)Cl	H2PtCl6
 
 # Metabolites
 Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O ATP
