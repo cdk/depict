@@ -276,6 +276,7 @@ Cl[Sn]Cl	SnCl2
 [Cl-].[Cl-].[Sn+2]	SnCl2
 Cl[Sn](Cl)(Cl)Cl	SnCl4
 CCCC[N+](CCCC)(CCCC)CCCC.[F-]	TBAF
+CCCC[N+](CCCC)(CCCC)CCCC.[I-]	TBAI
 CN(C)C(On1nnc2ccccc21)=[N+](C)C.F[B-](F)(F)F	TBTU
 O=C(O)C(F)(F)F	TFA
 O=C(OC(=O)C(F)(F)F)C(F)(F)F	TFAA
