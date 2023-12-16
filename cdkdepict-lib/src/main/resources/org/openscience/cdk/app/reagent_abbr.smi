@@ -264,7 +264,6 @@ Cl[Pd]Cl	PdCl2
 C1CCNCC1	Piperidine
 O=[Pt]=O	PtO2
 c1cccc2c1nnn2O[P+](N1CCCC1)(N1CCCC1)N1CCCC1.F[P-](F)(F)(F)(F)F	PyBOP
-c1cccc2c1nnn2O[P+](N1CCCC1)(N1CCCC1)N1CCCC1.F[P-](F)(F)(F)(F)F	PyBop
 Br[P+](N1CCCC1)(N1CCCC1)N1CCCC1.F[P-](F)(F)(F)(F)F	PyBrOP
 c1ccncc1	Pyridine
 C1CCNC1	Pyrrolidine
