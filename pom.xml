@@ -16,7 +16,7 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.9</cdk.version>
+    <cdk.version>2.10-SNAPSHOT</cdk.version>
     <depict.version>${project.parent.version}</depict.version>
     <junit.version>5.10.0</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
