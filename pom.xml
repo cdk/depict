@@ -18,7 +18,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cdk.version>2.10-SNAPSHOT</cdk.version>
     <depict.version>${project.parent.version}</depict.version>
-    <junit.version>5.10.0</junit.version>
+    <junit.version>5.10.1</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <!-- Note -Pjakarta for Spring 6 (Requires Java 17 and JakartaEE) -->
     <spring-webmvc.version>5.3.29</spring-webmvc.version>
