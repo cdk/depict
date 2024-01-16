@@ -31,6 +31,11 @@ public class Context {
       registry.addResourceHandler("/**")
               .addResourceLocations("/WEB-INF/static/")
               .setCachePeriod(3600);
+
+      registry.addResourceHandler("/webjars/**")
+              .addResourceLocations("/webjars/")
+	      .resourceChain(false);
+
     }
   }
 }
