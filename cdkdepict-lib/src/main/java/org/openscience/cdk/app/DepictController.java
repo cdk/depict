@@ -249,21 +249,7 @@ public class DepictController {
     if (!getBoolean(Param.SUPRESSH, params)) {
       return HydrogenDisplayType.Provided;
     } else {
-      switch (getString(Param.HDISPLAY, params)) {
-        case "suppressed":
-          return HydrogenDisplayType.Minimal;
-        case "provided":
-          return HydrogenDisplayType.Provided;
-        case "stereo":
-          return HydrogenDisplayType.Stereo;
-        case "bridgeheadtetrahedral":
-        case "bridgehead":
-        case "default":
-        case "smart":
-          return HydrogenDisplayType.Smart;
-        default:
-          return HydrogenDisplayType.Smart;
-      }
+      return HydrogenDisplayType.parse(getString(Param.HDISPLAY, params));
     }
   }
 
@@ -693,6 +679,9 @@ public class DepictController {
     switch (hDisplayType) {
       case Minimal:
         AtomContainerManipulator.suppressHydrogens(mol);
+        break;
+      case Explicit:
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
         break;
       case Stereo: {
         AtomContainerManipulator.suppressHydrogens(mol);

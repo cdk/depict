@@ -56,11 +56,12 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
       <option value="atomvalue">Atom Value</option>
       <option value="cip">CIP Stereo Label</option>
     </select>
-    <select name="hdisp" onchange="update()">
-      <option value="minimal">Minimal Hydrogens</option>
-      <option value="stereo">Chiral Hydrogens</option>
-      <option value="bridgehead" selected>Chiral Hydrogens (smart)</option>
-      <option value="provided">Default Hydrogens</option>
+    <select id="hdisp" name="hdisp" onchange="update()">
+      <option value="M">Minimal Hydrogens</option>
+      <option value="P">Input Hydrogens</option>
+      <option value="S" selected>Smart Hydrogens</option>
+      <option value="C">Chiral Hydrogens</option>
+      <option value="X">Explicit Hydrogens</option>
     </select>
     <select name="abbr" onchange="update()">
       <option value="on" selected>Abbreviate Reagents and Groups</option>
