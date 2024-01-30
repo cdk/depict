@@ -257,6 +257,7 @@ C1C=CC(C=1)(P(c1ccccc1)c1ccccc1)[Fe]C1(C=CC=C1)P(c1ccccc1)c1ccccc1.ClCCl.Cl[Pd]C
 c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.ClCCl.Cl[Pd]Cl.[Fe+2]	Pd(dppf)2Cl2CH2Cl2
 C1C=CC(C=1)(P(c1ccccc1)c1ccccc1)[Fe]C1(C=CC=C1)P(c1ccccc1)c1ccccc1.Cl[Pd]Cl	Pd(dppf)Cl2
 c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.c1ccc(cc1)P(c1ccccc1)[c-]1cccc1.Cl[Pd]Cl.[Fe+2]	Pd(dppf)Cl2
+CC(C)(C)[P](C(C)(C)C)([c-]1cccc1)[Pd](Cl)(Cl)[P](C(C)(C)C)(C(C)(C)C)[c-]1cccc1.[Fe+2]	Pd(dtbpf)Cl2
 O=C(/C=C/c1ccccc1)/C=C/c1ccccc1.O=C(/C=C/c1ccccc1)/C=C/c1ccccc1.O=C(/C=C/c1ccccc1)/C=C/c1ccccc1.[Pd].[Pd]	Pd2(dba)3
 O=C(C=Cc1ccccc1)C=Cc1ccccc1.O=C(C=Cc1ccccc1)C=Cc1ccccc1.O=C(C=Cc1ccccc1)C=Cc1ccccc1.[Pd].[Pd]	Pd2(dba)3
 O=C(C=Cc1ccccc1)C=Cc1ccccc1.O=C(C=Cc1ccccc1)C=Cc1ccccc1.O=C(C=Cc1ccccc1)C=Cc1ccccc1.[Pd].[Pd]	Pd2dba3
@@ -323,6 +324,7 @@ CC(C)(C)O	tBuOH
 CC(C)(C)O[K]	tBuOK
 CC(C)(C)[O-].[K+]	tBuOK
 CC(C)(C)[PH+](C(C)(C)C)C(C)(C)C.F[B-](F)(F)F TTBP·HBF4
+C(#N)C=P(CCCC)(CCCC)CCCC	CMBP
 
 # Metabolites
 Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O ATP
