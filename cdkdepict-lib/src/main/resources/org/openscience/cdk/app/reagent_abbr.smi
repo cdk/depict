@@ -243,6 +243,8 @@ F[P-](F)(F)(F)(F)F	PF6-
 O=P(Cl)(Cl)Cl	POCl3
 Cc1ccc(cc1)S([O-])(=O)=O.c1cc[nH+]cc1	PPTS
 c1ccc(cc1)P(c1ccccc1)c1ccccc1	PPh3
+c1ccc(cc1)[P+](C)(c1ccccc1)c1ccccc1.[Br-]	Ph3PMeBr
+c1ccc(cc1)[P](Br)(C)(c1ccccc1)c1ccccc1	Ph3PMeBr
 CC(=O)O[Pd]OC(C)=O	Pd(OAc)2
 CC([O-])=O.CC([O-])=O.[Pd+2]	Pd(OAc)2
 O[Pd]O	Pd(OH)2
