@@ -23,6 +23,7 @@ BrC(Br)(Br)Br	CBr4
 ClC(Cl)(Cl)Cl	CCl4
 O=C(n1ccnc1)n1ccnc1	CDI
 ClC(Cl)Cl	CHCl3
+[C-]#[O+]	CO
 O=C=O	CO2
 S=C=S	CS2
 O=C1O[Ca]O1	CaCO3
