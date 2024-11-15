@@ -42,8 +42,11 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
+import org.openscience.cdk.stereo.Octahedral;
+import org.openscience.cdk.stereo.SquarePlanar;
 import org.openscience.cdk.stereo.Stereocenters;
 import org.openscience.cdk.stereo.TetrahedralChirality;
+import org.openscience.cdk.stereo.TrigonalBipyramidal;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionSetManipulator;
@@ -67,9 +70,11 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -739,15 +744,42 @@ public class DepictController {
               IAtom focus = (IAtom) se.getFocus();
               if (focus.getImplicitHydrogenCount() == 1 &&
                       shouldAddH(mol, focus, mol.getConnectedBondsList(focus))) {
-                focus.setImplicitHydrogenCount(0);
-                IAtom hydrogen = sproutHydrogen(mol, focus);
-                IStereoElement tmp = se.map(Collections.singletonMap(focus, hydrogen));
                 // need to keep focus same
                 TetrahedralChirality e = new TetrahedralChirality(focus,
-                                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
-                                                                  tmp.getConfig());
+                                                                  getExplHCarriers(mol, se, focus),
+                                                                  se.getConfig());
                 e.setGroupInfo(se.getGroupInfo());
                 ses.add(e);
+              } else {
+                ses.add(se);
+              }
+            }
+            break;
+            case IStereoElement.SquarePlanar:
+            {
+              IAtom focus = (IAtom) se.getFocus();
+              if (focus.getImplicitHydrogenCount() > 0) {
+                ses.add(new SquarePlanar(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
+              } else {
+                ses.add(se);
+              }
+            }
+            break;
+            case IStereoElement.TrigonalBipyramidal:
+            {
+              IAtom focus = (IAtom) se.getFocus();
+              if (focus.getImplicitHydrogenCount() > 0) {
+                ses.add(new TrigonalBipyramidal(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
+              } else {
+                ses.add(se);
+              }
+            }
+            break;
+            case IStereoElement.Octahedral:
+            {
+              IAtom focus = (IAtom) se.getFocus();
+              if (focus.getImplicitHydrogenCount() > 0) {
+                ses.add(new Octahedral(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
               } else {
                 ses.add(se);
               }
@@ -821,6 +853,20 @@ public class DepictController {
       default:
         break;
     }
+  }
+
+  // utility to sprout multiple hydrogens for stereo centres
+  private IAtom[] getExplHCarriers(IAtomContainer mol, IStereoElement se, IAtom focus) {
+    Deque<IAtom> hydrogens = new ArrayDeque<>();
+    for (int i = 0; i < focus.getImplicitHydrogenCount(); i++) {
+      hydrogens.add(sproutHydrogen(mol, focus));
+    }
+    focus.setImplicitHydrogenCount(0);
+    List<IAtom> carriers = new ArrayList<>();
+    for (IAtom carrier : (List<IAtom>) se.getCarriers()) {
+        carriers.add(carrier.equals(focus) && !hydrogens.isEmpty() ? hydrogens.poll() : carrier);
+    }
+    return carriers.toArray(new IAtom[0]);
   }
 
   private boolean shouldAddH(IAtomContainer mol, IAtom atom, Iterable<IBond> bonds) {
@@ -1221,8 +1267,7 @@ public class DepictController {
                                   new HttpHeaders(),
                                   HttpStatus.BAD_REQUEST);
     } else {
-      ex.printStackTrace();
-      LoggerFactory.getLogger(DepictController.class).error("Unexpected Error: " + ex);
+      LoggerFactory.getLogger(DepictController.class).error("Unexpected Error: ", ex);
       return new ResponseEntity<>("<!DOCTYPE html><html><title>500 - Internal Server Error</title><body><div>" +
                                           "<h1>" + ex.getClass().getSimpleName() + "</h1>" +
                                           ex.getMessage() +
@@ -1230,5 +1275,12 @@ public class DepictController {
                                   new HttpHeaders(),
                                   HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  public static void main(String[] args) throws IOException, CDKException {
+    new DepictController().depict("ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2C[C@H](CCC2)O.O1CCOCC1.CC1(C2=C(C(=CC=C2)P(C3=CC=CC=C3)C4=CC=CC=C4)OC5=C(C=CC=C15)P(C6=CC=CC=C6)C7=CC=CC=C7)C.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.[Pd].[Pd].[Cs]OC(=O)O[Cs]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(OCC)=O)N6C[C@H](CCC6)O>CO.C1CCOC1.O.O[Li]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(O)=O)N6C[C@H](CCC6)O>CN(C)C(=[N+](C)C)ON1C2=C(C=CC=N2)N=N1.F[P-](F)(F)(F)(F)F.[NH4+].[Cl-].CN(C)C=O.CCN(C(C)C)C(C)C>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(N)=O)N6C[C@H](CCC6)O>>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N)N=CC3C(N)=O)N4C[C@H](CCC4)O |f:4.5.6.7.8,16.17,18.19|  US20190241576A1",
+                                  "svg",
+                                  "bot",
+                                  new HashMap<>());
   }
 }
