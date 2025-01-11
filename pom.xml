@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openscience.cdk</groupId>
   <artifactId>cdkdepict</artifactId>
-  <version>1.12-SNAPSHOT</version>
+  <version>1.12</version>
   <modules>
     <module>cdkdepict-lib</module>
     <module>cdkdepict-webapp</module>
@@ -16,9 +16,9 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.10-SNAPSHOT</cdk.version>
+    <cdk.version>2.10</cdk.version>
     <depict.version>${project.parent.version}</depict.version>
-    <junit.version>5.10.2</junit.version>
+    <junit.version>5.11.4</junit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <!-- Note -Pjakarta for Spring 6 (Requires Java 17 and JakartaEE) -->
     <spring-webmvc.version>5.3.39</spring-webmvc.version>
@@ -160,8 +160,8 @@
     <profile>
       <id>jakarta</id>
       <properties>
-        <spring-webmvc.version>6.0.11</spring-webmvc.version>
-        <spring-boot.version>3.1.2</spring-boot.version>
+        <spring-webmvc.version>6.2.1</spring-webmvc.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
       </properties>
       <build>
         <plugins>

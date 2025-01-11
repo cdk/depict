@@ -328,6 +328,7 @@ CC(C)(C)O[K]	tBuOK
 CC(C)(C)[O-].[K+]	tBuOK
 CC(C)(C)[PH+](C(C)(C)C)C(C)(C)C.F[B-](F)(F)F TTBP·HBF4
 C(#N)C=P(CCCC)(CCCC)CCCC	CMBP
+CCCP1(=O)OP(=O)(CCC)OP(=O)(CCC)O1	T3P
 
 # Metabolites
 Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O ATP
