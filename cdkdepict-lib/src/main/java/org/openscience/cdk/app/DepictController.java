@@ -395,7 +395,9 @@ public class DepictController {
                                            new Color(249, 163, 251),
                                            new Color(255, 225, 154),
                                            new Color(227, 227, 227)})
-                                   .withOuterGlowHighlight(6d);
+                                   .withOuterGlowHighlight(6d)
+                                   .withParam(StandardGenerator.Highlighting.class,
+                                              StandardGenerator.HighlightStyle.OuterGlowFillRings);
         } else {
           myGenerator = myGenerator.withOuterGlowHighlight();
           myGenerator = myGenerator.withParam(StandardGenerator.Visibility.class,
