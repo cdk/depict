@@ -389,11 +389,11 @@ public class DepictController {
         break;
       case "colmap":
         if (isRxn) {
-          myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
-                                           new Color(185, 255, 180),
-                                           new Color(255, 162, 162),
-                                           new Color(253, 139, 255),
-                                           new Color(255, 206, 86),
+          myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(179, 204, 255),
+                                           new Color(194, 255, 190),
+                                           new Color(255, 166, 166),
+                                           new Color(249, 163, 251),
+                                           new Color(255, 225, 154),
                                            new Color(227, 227, 227)})
                                    .withOuterGlowHighlight(6d);
         } else {
