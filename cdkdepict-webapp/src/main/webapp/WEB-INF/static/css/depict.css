@@ -6,6 +6,10 @@ body {
   color: #222;
 }
 
+body#react {
+  background-color: #ad5368;
+}
+
 .center {
 	margin: auto;
 	max-width:  960px;
@@ -232,6 +236,25 @@ textarea#input {
 	height: 125px;
 	resize: vertical;
 }
+
+#inputs {
+	display: grid;
+	grid-template-columns: auto max-content auto;
+	grid-gap: 5px;
+	align-items: center;
+}
+
+#inputs input {
+	grid-column: span 3;
+	font-family: Menlo, Courier, Fixed-Width;
+}
+
+#inputs textarea {
+	min-height: 40px;
+    height: 125px;
+	resize: none;
+}
+
 
 #sma {
 	width:  249px;

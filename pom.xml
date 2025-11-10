@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openscience.cdk</groupId>
   <artifactId>cdkdepict</artifactId>
-  <version>1.13</version>
+  <version>1.14-SNAPSHOT</version>
   <modules>
     <module>cdkdepict-lib</module>
     <module>cdkdepict-webapp</module>
@@ -16,7 +16,7 @@
   <url>http://github.com/cdk/cdkdepict</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdk.version>2.11</cdk.version>
+    <cdk.version>2.12-SNAPSHOT</cdk.version>
     <depict.version>${project.parent.version}</depict.version>
     <junit.version>5.11.4</junit.version>
     <hamcrest.version>2.2</hamcrest.version>

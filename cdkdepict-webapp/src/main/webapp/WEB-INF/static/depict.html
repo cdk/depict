@@ -51,6 +51,7 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
     <select name="annotate" onchange="update()">
       <option value="none" selected>No Annotation</option>
       <option value="number">Atom Numbers</option>
+      <option value="bondnumber">Bond Numbers</option>
       <option value="mapidx">Atom Mapping</option>
       <option value="colmap">Color Map</option>
       <option value="atomvalue">Atom Value</option>
@@ -97,6 +98,17 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
             <option value="n">Never</option>
           </select>
         </td>
+        <th title="Change the multicenter display style">Multicenter</th>
+        <td>
+          <select name="mc" onchange="update()">
+            <option value="p" selected>Provided</option>
+            <option value="d">Dative</option>
+            <option value="an">Dash</option>
+            <option value="hn">Hidden</option>
+            <option value="a">Dash (alt)</option>
+            <option value="h">Hidden (alt)</option>
+          </select>
+        </td>
         <th title="Render the title inside the sketch rather than HTML">Embed Title</th>
         <td>
           <input type="checkbox" name="showtitle" onchange="update()">
@@ -116,6 +128,10 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
         <th>Flip</th>
         <td>
           <input type="checkbox" name="flip" onchange="update()">
+        </td>
+        <th>Donuts</th>
+        <td>
+          <input type="checkbox" name="donuts" onchange="update()">
         </td>
       </tr>
     </table>

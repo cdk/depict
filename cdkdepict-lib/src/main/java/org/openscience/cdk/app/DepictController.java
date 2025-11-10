@@ -10,6 +10,7 @@ import com.simolecule.centres.BaseMol;
 import com.simolecule.centres.CdkLabeller;
 import com.simolecule.centres.Descriptor;
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.depict.Abbreviations;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
@@ -148,6 +149,8 @@ public class DepictController {
     SHOWTITLE("showtitle", false),
     ARROW("arw", IReaction.Direction.FORWARD),
     DATIVE("dat", MolOp.DativeBond.Metals),
+    DONUTS("dnt", false),
+    MULTICENTER("mc", MolOp.MulticenterStyle.Provided),
     ZOOM("zoom", 1.3),
     RATIO("ratio", 1.1),
     ROTATE("r", 0),
@@ -309,6 +312,12 @@ public class DepictController {
                                           });
     }
 
+    boolean doAromaticity = false;
+    if (getBoolean(Param.DONUTS, extra)) {
+      doAromaticity = getString(Param.SMARTSQUERY, extra).isEmpty();
+      myGenerator = myGenerator.withAromaticDisplay();
+    }
+
     final boolean isRxn = !smi.contains("V2000") && !smi.contains("V3000") && isRxnSmi(smi);
     final boolean isRgp = smi.contains("RG:");
     IReactionSet rxns = null;
@@ -337,6 +346,14 @@ public class DepictController {
 
       highlight = new HashSet<>();
       for (IReaction rxn : rxns.reactions()) {
+
+        if (doAromaticity) {
+          for (IAtomContainer component : rxn) {
+              Cycles.markRingAtomsAndBonds(component);
+              Aromaticity.apply(Aromaticity.Model.Daylight, component);
+          }
+        }
+
         Set<IChemObject> hits = findHits(getString(Param.SMARTSQUERY, extra),
                                          rxn,
                                          null,
@@ -363,6 +380,12 @@ public class DepictController {
       }
     } else {
       mol = loadMol(smi);
+
+      if (doAromaticity) {
+        Cycles.markRingAtomsAndBonds(mol);
+        Aromaticity.apply(Aromaticity.Model.Daylight, mol);
+      }
+
       setHydrogenDisplay(mol, hDisplayType);
       highlight = findHits(getString(Param.SMARTSQUERY, extra),
                            null,
@@ -379,6 +402,10 @@ public class DepictController {
     switch (annotate) {
       case "number":
         myGenerator = myGenerator.withAtomNumbers();
+        abbr = "false";
+        break;
+      case "bondnumber":
+        myGenerator = myGenerator.withBondNumbers();
         abbr = "false";
         break;
       case "mapidx":
@@ -465,6 +492,10 @@ public class DepictController {
       }
     }
 
+    // and reaction?
+    MolOp.setMulticenterStyle(mol,
+                              getParam(Param.MULTICENTER, extra, this::parseMulticenter));
+
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
     // pre-render the depiction
@@ -503,6 +534,27 @@ public class DepictController {
         return null;
     }
   }
+
+    private MolOp.MulticenterStyle parseMulticenter(String s) {
+        if (s == null || s.isEmpty())
+            return null;
+        switch (s.toLowerCase(Locale.ROOT)) {
+            case "p":
+                return MolOp.MulticenterStyle.Provided;
+            case "d":
+                return MolOp.MulticenterStyle.Dative;
+            case "a":
+                return MolOp.MulticenterStyle.Dashed;
+            case "an":
+                return MolOp.MulticenterStyle.DashedNeutral;
+            case "h":
+                return MolOp.MulticenterStyle.Hidden;
+            case "hn":
+                return MolOp.MulticenterStyle.HiddenNeutral;
+            default:
+                return null;
+        }
+    }
 
   private IReaction.Direction parseArrowParam(String s) {
     if (s == null || s.isEmpty())
