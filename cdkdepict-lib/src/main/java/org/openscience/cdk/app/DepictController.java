@@ -449,28 +449,22 @@ public class DepictController {
         break;
     }
 
-    // add highlight from atom/bonds hit by the provided SMARTS
+    // add highlight from atom/bonds hit by the provided SMARTS or
+    // the MDL HILITE or CXSMILES ha/hb: fields
+    Color hgCol = new Color(0xaaffaa);
     switch (style) {
       case "nob":
-        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
-                                            new Color(0xffaaaa))
-                                 .withHighlight(highlight, new Color(0xffaaaa));
+        hgCol = new Color(0xffaaaa);
         break;
       case "bow":
       case "wob":
       case "bot":
-        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
-                                            new Color(0xff0000))
-                                 .withHighlight(highlight,
-                                                new Color(0xff0000));
-        break;
-      default:
-        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
-                                            new Color(0xaaffaa))
-                                 .withHighlight(highlight,
-                                                new Color(0xaaffaa));
+        hgCol = Color.RED;
         break;
     }
+
+    myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class, hgCol)
+                             .withHighlight(highlight, hgCol);
 
     if (getBoolean(Param.SHOWTITLE, extra)) {
       if (isRxn)
