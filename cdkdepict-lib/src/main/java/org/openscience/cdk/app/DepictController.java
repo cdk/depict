@@ -452,17 +452,22 @@ public class DepictController {
     // add highlight from atom/bonds hit by the provided SMARTS
     switch (style) {
       case "nob":
-        myGenerator = myGenerator.withHighlight(highlight,
-                                                new Color(0xffaaaa));
+        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
+                                            new Color(0xffaaaa))
+                                 .withHighlight(highlight, new Color(0xffaaaa));
         break;
       case "bow":
       case "wob":
       case "bot":
-        myGenerator = myGenerator.withHighlight(highlight,
+        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
+                                            new Color(0xff0000))
+                                 .withHighlight(highlight,
                                                 new Color(0xff0000));
         break;
       default:
-        myGenerator = myGenerator.withHighlight(highlight,
+        myGenerator = myGenerator.withParam(RendererModel.SelectionColor.class,
+                                            new Color(0xaaffaa))
+                                 .withHighlight(highlight,
                                                 new Color(0xaaffaa));
         break;
     }
