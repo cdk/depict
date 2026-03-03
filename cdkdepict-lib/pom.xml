@@ -8,6 +8,7 @@
     <version>1.14</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <name>cdkdepict-lib</name>
   <artifactId>cdkdepict-lib</artifactId>
   <dependencies>
     <dependency>
