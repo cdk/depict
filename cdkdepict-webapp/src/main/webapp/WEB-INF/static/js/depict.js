@@ -16,7 +16,9 @@ function smittl(smiles) {
     i = j;
   if (i < 0)
     return ''; // no title
-  return smiles.substring(i+1);
+  var prelim = smiles.substring(i+1);
+  // remove anything that looks like CXSMILES layers from the start
+  return prelim.replace(/^\|.+\|($|\s)/, "");
 }
 
 function renderSMILES(inputs, opts) {
@@ -35,7 +37,6 @@ function renderSMILES(inputs, opts) {
       continue
 
     var title = smittl(input);
-    title = title.replace(/^\|[^|]+\|\s+/, "");
     if (!title)
       title = "#" + (1+i);
 
