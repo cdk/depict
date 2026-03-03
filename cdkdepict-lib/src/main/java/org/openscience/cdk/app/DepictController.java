@@ -49,6 +49,7 @@ import org.openscience.cdk.stereo.Stereocenters;
 import org.openscience.cdk.stereo.TetrahedralChirality;
 import org.openscience.cdk.stereo.TrigonalBipyramidal;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.HydrogenState;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
 import org.openscience.cdk.tools.manipulator.ReactionSetManipulator;
 import org.slf4j.LoggerFactory;
@@ -168,17 +169,10 @@ public class DepictController {
   }
 
   public DepictController() throws IOException {
-    this.groupAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
     this.agentAbbr.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
     this.agentAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
-    this.agentAbbr
-            .with(Abbreviations.Option.ALLOW_SINGLETON)
-            .with(Abbreviations.Option.AUTO_CONTRACT_TERMINAL)
-            .without(Abbreviations.Option.AUTO_CONTRACT_HETERO);
-    this.groupAbbr
-            .without(Abbreviations.Option.ALLOW_SINGLETON)
-            .with(Abbreviations.Option.AUTO_CONTRACT_TERMINAL)
-            .without(Abbreviations.Option.AUTO_CONTRACT_HETERO);
+    this.agentAbbr.with(Abbreviations.Option.ALLOW_SINGLETON);
+    this.groupAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
   }
 
   private <T> T getParam(Param param,
@@ -319,7 +313,6 @@ public class DepictController {
     }
 
     final boolean isRxn = !smi.contains("V2000") && !smi.contains("V3000") && isRxnSmi(smi);
-    final boolean isRgp = smi.contains("RG:");
     IReactionSet rxns = null;
     IAtomContainer mol = null;
     List<IAtomContainer> mols = null;
@@ -498,9 +491,7 @@ public class DepictController {
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
     // pre-render the depiction
-    final Depiction depiction = isRxn ? myGenerator.depict(rxns)
-            : isRgp ? myGenerator.depict(mols, mols.size(), 1)
-            : myGenerator.depict(mol);
+    final Depiction depiction = isRxn ? myGenerator.depict(rxns) : myGenerator.depict(mol);
 
     switch (fmtlc) {
       case Depiction.SVG_FMT:
@@ -736,222 +727,22 @@ public class DepictController {
   private void setHydrogenDisplay(IAtomContainer mol, HydrogenDisplayType hDisplayType) {
     switch (hDisplayType) {
       case Minimal:
-        AtomContainerManipulator.suppressHydrogens(mol);
+        AtomContainerManipulator.normalizeHydrogens(mol, HydrogenState.Minimal);
         break;
       case Explicit:
-        AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+        AtomContainerManipulator.normalizeHydrogens(mol, HydrogenState.Explicit);
         break;
-      case Stereo: {
-        AtomContainerManipulator.suppressHydrogens(mol);
-        List<IStereoElement> ses = new ArrayList<>();
-        for (IStereoElement se : mol.stereoElements()) {
-          switch (se.getConfigClass()) {
-            case IStereoElement.Tetrahedral: {
-              IAtom focus = (IAtom) se.getFocus();
-              if (focus.getImplicitHydrogenCount() == 1) {
-                focus.setImplicitHydrogenCount(0);
-                IAtom hydrogen = sproutHydrogen(mol, focus);
-                IStereoElement tmp = se.map(Collections.singletonMap(focus, hydrogen));
-                // need to keep focus same
-                TetrahedralChirality e = new TetrahedralChirality(focus,
-                                                                  (IAtom[]) tmp.getCarriers().toArray(new IAtom[4]),
-                                                                  tmp.getConfig());
-                e.setGroupInfo(se.getGroupInfo());
-                ses.add(e);
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.CisTrans: {
-              IBond focus = (IBond) se.getFocus();
-              IAtom beg = focus.getBegin();
-              IAtom end = focus.getEnd();
-              if (beg.getImplicitHydrogenCount() == 1) {
-                beg.setImplicitHydrogenCount(0);
-                sproutHydrogen(mol, beg);
-              }
-              if (end.getImplicitHydrogenCount() == 1) {
-                end.setImplicitHydrogenCount(0);
-                sproutHydrogen(mol, end);
-              }
-              // don't need to update stereo element
-              ses.add(se);
-            }
-            break;
-            default:
-              ses.add(se);
-              break;
-          }
-        }
-        mol.setStereoElements(ses);
-      }
-      break;
-      case Smart: {
-        AtomContainerManipulator.suppressHydrogens(mol);
-        Cycles.markRingAtomsAndBonds(mol);
-        List<IStereoElement> ses = new ArrayList<>();
-        for (IStereoElement se : mol.stereoElements()) {
-          switch (se.getConfigClass()) {
-            case IStereoElement.Tetrahedral: {
-              IAtom focus = (IAtom) se.getFocus();
-              if (focus.getImplicitHydrogenCount() == 1 &&
-                      shouldAddH(mol, focus, mol.getConnectedBondsList(focus))) {
-                // need to keep focus same
-                TetrahedralChirality e = new TetrahedralChirality(focus,
-                                                                  getExplHCarriers(mol, se, focus),
-                                                                  se.getConfig());
-                e.setGroupInfo(se.getGroupInfo());
-                ses.add(e);
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.SquarePlanar:
-            {
-              IAtom focus = (IAtom) se.getFocus();
-              if (focus.getImplicitHydrogenCount() > 0) {
-                ses.add(new SquarePlanar(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.TrigonalBipyramidal:
-            {
-              IAtom focus = (IAtom) se.getFocus();
-              if (focus.getImplicitHydrogenCount() > 0) {
-                ses.add(new TrigonalBipyramidal(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.Octahedral:
-            {
-              IAtom focus = (IAtom) se.getFocus();
-              if (focus.getImplicitHydrogenCount() > 0) {
-                ses.add(new Octahedral(focus, getExplHCarriers(mol, se, focus), se.getConfig()));
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.CisTrans: {
-              IBond focus = (IBond) se.getFocus();
-              IAtom begin = focus.getBegin();
-              IAtom end = focus.getEnd();
-              IAtom hydrogenBegin = null;
-              IAtom hydrogenEnd = null;
-
-              if (begin.getImplicitHydrogenCount() == 1 &&
-                      shouldAddH(mol, begin, mol.getConnectedBondsList(begin))) {
-                begin.setImplicitHydrogenCount(0);
-                hydrogenBegin = sproutHydrogen(mol, begin);
-              }
-
-              if (end.getImplicitHydrogenCount() == 1 &&
-                      shouldAddH(mol, end, mol.getConnectedBondsList(end))) {
-                end.setImplicitHydrogenCount(0);
-                hydrogenEnd = sproutHydrogen(mol, end);
-              }
-
-              if (hydrogenBegin != null || hydrogenEnd != null) {
-                Map<IAtom, IAtom> map = new HashMap<>();
-                map.put(begin, hydrogenBegin);
-                map.put(end, hydrogenEnd);
-                ses.add(se.map(map));
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            case IStereoElement.Allenal: {
-              IAtom focus = (IAtom) se.getFocus();
-              IAtom[] terminals = ExtendedTetrahedral.findTerminalAtoms(mol, focus);
-              IAtom hydrogen1 = null;
-              IAtom hydrogen2 = null;
-              if (terminals[0].getImplicitHydrogenCount() == 1) {
-                terminals[0].setImplicitHydrogenCount(0);
-                hydrogen1 = sproutHydrogen(mol, terminals[0]);
-              }
-              if (terminals[1].getImplicitHydrogenCount() == 1) {
-                terminals[1].setImplicitHydrogenCount(0);
-                hydrogen2 = sproutHydrogen(mol, terminals[1]);
-              }
-              if (hydrogen1 != null || hydrogen2 != null) {
-                Map<IAtom, IAtom> map = new HashMap<>();
-                if (hydrogen1 != null)
-                  map.put(terminals[0], hydrogen1);
-                if (hydrogen2 != null)
-                  map.put(terminals[1], hydrogen2);
-                // find as focus is not one of the terminals
-                IStereoElement<IAtom, IAtom> tmp = se.map(map);
-                ses.add(tmp);
-              } else {
-                ses.add(se);
-              }
-            }
-            break;
-            default:
-              ses.add(se);
-              break;
-          }
-        }
-        mol.setStereoElements(ses);
-      }
-      break;
+      case Stereo:
+        AtomContainerManipulator.normalizeHydrogens(mol, HydrogenState.Stereo);
+        break;
+      case Smart:
+        AtomContainerManipulator.normalizeHydrogens(mol, HydrogenState.Depiction);
+        break;
       case Provided:
       default:
+        // do nothing
         break;
     }
-  }
-
-  // utility to sprout multiple hydrogens for stereo centres
-  private IAtom[] getExplHCarriers(IAtomContainer mol, IStereoElement se, IAtom focus) {
-    Deque<IAtom> hydrogens = new ArrayDeque<>();
-    for (int i = 0; i < focus.getImplicitHydrogenCount(); i++) {
-      hydrogens.add(sproutHydrogen(mol, focus));
-    }
-    focus.setImplicitHydrogenCount(0);
-    List<IAtom> carriers = new ArrayList<>();
-    for (IAtom carrier : (List<IAtom>) se.getCarriers()) {
-        carriers.add(carrier.equals(focus) && !hydrogens.isEmpty() ? hydrogens.poll() : carrier);
-    }
-    return carriers.toArray(new IAtom[0]);
-  }
-
-  private boolean shouldAddH(IAtomContainer mol, IAtom atom, Iterable<IBond> bonds) {
-    int count = 0;
-    for (IBond bond : bonds) {
-      IAtom nbr = bond.getOther(atom);
-      if (bond.isInRing()) {
-        ++count;
-      } else {
-        for (IStereoElement se : mol.stereoElements()) {
-          if (se.getConfigClass() == IStereoElement.TH &&
-                  se.getFocus().equals(nbr)) {
-            count++;
-          }
-        }
-      }
-      // hydrogen isotope
-      if (nbr.getAtomicNumber() == 1 &&
-              nbr.getMassNumber() != null)
-        return true;
-    }
-    return count == 3;
-  }
-
-  private IAtom sproutHydrogen(IAtomContainer mol, IAtom focus) {
-    IAtom hydrogen = mol.getBuilder().newAtom();
-    hydrogen.setAtomicNumber(1);
-    hydrogen.setSymbol("H");
-    hydrogen.setImplicitHydrogenCount(0);
-    mol.addAtom(hydrogen);
-    mol.addBond(mol.indexOf(focus), mol.getAtomCount() - 1, IBond.Order.SINGLE);
-    return mol.getAtom(mol.getAtomCount() - 1);
   }
 
   private void contractHydrates(IAtomContainer mol) {
