@@ -12,13 +12,25 @@ body#react {
 
 .center {
 	margin: auto;
-	max-width:  960px;
+	max-width:  1060px;
 	text-align: center;
 	background: white;
-  padding: 50px;
-  margin-top: 50px;
-  margin-bottom: 50px;
-  border-radius: 5px;
+    margin-top: 60px;
+    margin-bottom: 50px;
+    border-radius: 15px;
+}
+
+.center > div.content {
+	padding: 50px;
+}
+
+#react .center {
+   margin-top: calc(60px + 32px);
+   border-radius: 0 15px 15px 15px;
+}
+
+#react > .center > div.content {
+	padding: 10px 50px 50px 50px;
 }
 
 .header {
@@ -99,10 +111,11 @@ i.icon {
 
 .chemdiv .grid {
   display: grid;
-  grid-template-rows: minmax(0, auto) max-content;
+  grid-template-rows: minmax(0, auto) max-content min-content;
   grid-template-columns: minmax(0, auto);
   grid-template-areas: "main"
-                       "bottom";
+                       "bottom"
+                       "vbottom";
   width: 100%;
   height: 100%
 }
@@ -135,6 +148,40 @@ i.icon {
   width: 100%;
   font-size: smaller;
   grid-area: bottom;
+}
+
+.smiles {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: Menlo, Fixed;
+  color: #444;
+  font-size: x-small;
+  grid-area: vbottom;
+
+}
+
+.react-dir {
+  padding: 2px;
+  background: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.react-dir:hover {
+  padding: 2px;
+  background: lightblue;
+  border: none;
+}
+
+#help-text {
+	background: lightgreen;
+	font-size: smaller;
+	margin: 5px;
+	padding: 10px;
+	border: 2px solid black;
+	border-radius: 10px;
+	display: none;
 }
 
 .links {
@@ -222,12 +269,11 @@ i.icon {
 }
 
 .textin {
-	background-color: #333;
-	color: #00ee00;
-	font-family: "Courier", Monospace;
-	font-size: 10pt;
+	background-color: #f4f4f4;
+	color: black;
+	font-family: Menlo, Courier-New, Courier, Fixed-Width;
+	font-size: 9pt;
 	padding: 5px;
-	border: none;
 }
 
 textarea#input {
@@ -246,7 +292,6 @@ textarea#input {
 
 #inputs input {
 	grid-column: span 3;
-	font-family: Menlo, Courier, Fixed-Width;
 }
 
 #inputs textarea {
@@ -254,7 +299,6 @@ textarea#input {
     height: 125px;
 	resize: none;
 }
-
 
 #sma {
 	width:  249px;
@@ -269,4 +313,108 @@ textarea {
 
 textarea {
   padding: 5px;
+}
+
+.smirks-opts {
+  border-collapse: collapse;
+  border: 1px solid #555;
+  width: calc(100% - 70px);
+  margin-left: 35px;
+  margin-right: 35px;
+}
+
+.smirks-opts td {
+  background: #fff;
+  color: black;
+  font-size: small;
+  text-align: left;
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  background: none;
+  position: relative;
+  bottom: 32px;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: rgb(223, 123, 154);
+  color: #ad5368;
+  border-radius: 5px 5px 0 0;
+  border: solid 1px white;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  margin-right: 5px;
+  padding: 8px 16px;
+  transition: 0.3s;
+  height: 32px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: rgb(253, 153, 184);
+}
+
+/* Create an active/current tablink class */
+.mode-react .tab button.mode-react,
+.mode-norm .tab button.mode-norm,
+.mode-map .tab button.mode-map {
+  background-color: white;
+  color: black;
+}
+
+.buttons button {
+  background: #f4f4f4;
+}
+
+button#button-forward,
+button#button-backward,
+button#button-normalize,
+button#button-map {
+  display: none;
+}
+
+.mode-react button#button-forward,
+.mode-react button#button-backward {
+  display: block;
+}
+
+.mode-norm button#button-normalize {
+  display: block;
+}
+
+.mode-map button#button-map {
+  display: block;
+}
+
+.header-react,
+.header-norm,
+.header-map {
+  display: none;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.mode-react .header-react {
+  display: block;
+}
+
+.mode-norm .header-norm {
+  display: block;
+}
+
+.mode-map .header-map {
+  display: block;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
 }
