@@ -4,8 +4,6 @@
 
 package org.openscience.cdk.app;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.simolecule.centres.BaseMol;
 import com.simolecule.centres.CdkLabeller;
 import com.simolecule.centres.Descriptor;
@@ -804,7 +802,6 @@ public class DepictController {
         atomSet.put((IAtom) obj, 1);
     }
 
-    Multimap<IAtomContainer, Sgroup> sgroupmap = ArrayListMultimap.create();
     switch (mode.toLowerCase()) {
       case "true":
       case "on":
@@ -838,38 +835,6 @@ public class DepictController {
           contractHydrates(mol);
         }
         break;
-    }
-
-    Set<String> include = new HashSet<>();
-    for (Map.Entry<IAtomContainer, Sgroup> e : sgroupmap.entries()) {
-      final IAtomContainer mol = e.getKey();
-      final Sgroup abbrv = e.getValue();
-      int numAtoms = mol.getAtomCount();
-      if (abbrv.getBonds().isEmpty()) {
-        include.add(abbrv.getSubscript());
-      } else {
-        int numAbbr = abbrv.getAtoms().size();
-        double f = numAbbr / (double) numAtoms;
-        if (numAtoms - numAbbr > 1 && f <= 0.4) {
-          include.add(abbrv.getSubscript());
-        }
-      }
-    }
-
-    for (Map.Entry<IAtomContainer, Collection<Sgroup>> e : sgroupmap.asMap().entrySet()) {
-      final IAtomContainer mol = e.getKey();
-
-      List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS);
-      if (sgroups == null)
-        sgroups = new ArrayList<>();
-      else
-        sgroups = new ArrayList<>(sgroups);
-      mol.setProperty(CDKConstants.CTAB_SGROUPS, sgroups);
-
-      for (Sgroup abbrv : e.getValue()) {
-        if (include.contains(abbrv.getSubscript()))
-          sgroups.add(abbrv);
-      }
     }
   }
 
