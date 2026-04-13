@@ -20,9 +20,8 @@
         <depict.version>${project.parent.version}</depict.version>
         <junit.version>5.14.3</junit.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <!-- Note -Pjakarta for Spring 6 (Requires Java 17 and JakartaEE) -->
-        <spring-webmvc.version>5.3.39</spring-webmvc.version>
-        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-webmvc.version>6.2.17</spring-webmvc.version>
+        <spring-boot.version>3.5.13</spring-boot.version>
     </properties>
     <developers>
         <developer>
@@ -84,8 +83,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -159,10 +158,10 @@
     </dependencyManagement>
     <profiles>
         <profile>
-            <id>jakarta</id>
+            <id>javaee</id>
             <properties>
-                <spring-webmvc.version>6.2.1</spring-webmvc.version>
-                <spring-boot.version>3.4.1</spring-boot.version>
+                <spring-webmvc.version>5.3.39</spring-webmvc.version>
+                <spring-boot.version>2.7.18</spring-boot.version>
             </properties>
             <build>
                 <plugins>
@@ -170,7 +169,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
                         <configuration>
-                            <webXml>src/main/webapp/WEB-INF/web-jakarta.xml</webXml>
+                            <webXml>src/main/webapp/WEB-INF/web-javaee.xml</webXml>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -178,8 +177,8 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>3.2</version>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <source>8</source>
+                            <target>8</target>
                         </configuration>
                     </plugin>
                 </plugins>
