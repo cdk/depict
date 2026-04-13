@@ -47,6 +47,8 @@ CC(C)(C)OC(*)=O Boc
 *Cc1ccccc1 Bn
 *c1ccccc1 Ph
 *C1CCCCC1 Cy
+*C([2H])([2H])[2H] CD3
+*OC([2H])([2H])[2H] OCD3
 *OP(=O)(O)O OPO3H2
 *OP(=O)([O-])[O-] OPO3-2
 *OP(=O)([OH])[O-] OPOH3H-
