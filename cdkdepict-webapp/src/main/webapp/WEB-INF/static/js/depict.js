@@ -132,6 +132,7 @@ function depict_url(opts, smiles, fmt, w, h) {
 }
 
 function generate(opts, smiles, title) {
+    smiles = smiles.replaceAll('&gt;', '>');
     var isrxn    = smiles.indexOf('>') != -1;
     var numparts = isrxn ? ((smiles.split('>').length - 1) / 2) : 1;
 
