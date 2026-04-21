@@ -5,10 +5,9 @@
   <parent>
     <artifactId>cdkdepict</artifactId>
     <groupId>org.openscience.cdk</groupId>
-    <version>1.15</version>
+    <version>1.14</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <name>cdkdepict-lib</name>
   <artifactId>cdkdepict-lib</artifactId>
   <dependencies>
     <dependency>
@@ -44,12 +43,22 @@
     <dependency>
       <groupId>com.simolecule.centres</groupId>
       <artifactId>centres-cdk</artifactId>
-      <version>1.4</version>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.bioinceptionlabs</groupId>
+      <artifactId>rdt</artifactId>
+      <version>${rdt.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.36</version>
+    </dependency>
+    <dependency>
+     <groupId>com.google.guava</groupId>
+     <artifactId>guava</artifactId>
+     <version>33.1.0-jre</version>
     </dependency>
   </dependencies>
 </project>

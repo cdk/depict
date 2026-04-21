@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CDK Depict</title>
+  <title>CDK React</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="stylesheet" type="text/css" href="css/depict.css">
   <link rel="stylesheet" type="text/css" href="css/Glyphter.css">
   <link rel="stylesheet" type="text/css" href="webjars/font-awesome/css/all.css">
   <script src="webjars/jquery/jquery.min.js" type="text/javascript"></script>
-  <script src="js/depict.js" type="text/javascript"></script>
+  <script src="js/react.js" type="text/javascript"></script>
 </head>
 <body>
 <div class="center" style="background: none; margin-top: 0; margin-bottom: -80px; text-align: left; font-size: 40pt; font-weight: bold; color: #fff;">
@@ -15,7 +15,7 @@
 </div>
 <div class="center">
   <div class="header">
-    Generate depictions of molecules and reactions from <a href="https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system">SMILES</a> or <a href="https://en.wikipedia.org/wiki/Chemical_table_file">SDF</a>.
+    Apply a reaction <a href="https://en.wikipedia.org/wiki/SMIRKS">SMIRKS</a> transformation to one input molecule and depict all generated reactions.
     <div style="margin-top: 10px;">
       <a href="depict.html">Depict</a> |
       <a href="react.html">React</a> |
@@ -24,27 +24,21 @@
     <a style="position: absolute; right: 0; top: 0;"
        href="https://github.com/cdk/depict"><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></a>
   </div>
-  <textarea id="input" onkeyup="update()" autofocus>CN1C=NC2=C1C(=O)N(C(=O)N2C)C caffeine
-[Cs+].[O-]C(=O)[O-].[Cs+] Cs2CO3
-[Li+].[Al+3].[H-].[H-].[H-].[H-] LiAlH4
-Cl[Pt@SP1](Cl)([NH3])[NH3] cis-platin
-O=[N+]([O-])[Co@]([NH3])([NH3])([NH3])([NH3])[N+]([O-])(=O) trans-[Co(NH3)4(NO2)2]
-Cl*.Cl*.c1ccccc1-c1ccccc1 |m:1:4.5.6.7.8.9,3:10.11.12.13.14.15| dichlorobiphenyl
-CCOCCOCCO |Sg:n:3,4,5::ht| PEGn
-*c1ccccc1 |$_AP1$| phenyl
-CC(C)[C@H](N*)C(*)=O |$;;;;;_AP1;;_AP2;$| valine monomer
-c1(:*:c2c(:*:c1*)C(N(N2)*)=O)* |$;Y;;;X;;R10;;;;Z;;R11$| US 2007/0129374 (I)
-C*.C*.C1=CC=CC=C1C=2C(C=CN3C2C=*C(=*3)C**)=O.C* |$;R2;;R3;;;;;;;;;;;;;;W;;A;;X;R4;;;R1$,m:0:5.4.9.8.7.6,2:7.6.5.4.9.8,24:4.9.8.7.6.5,Sg:n:20:m:ht| US 2007/0129372 (I)
-[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].CCCCc1ccc(CO[C@H]2O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]2O[C@H]3O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]4O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]5O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]5OS(=O)(=O)[O-])[C@@H]4OS(=O)(=O)[O-])[C@@H]3OS(=O)(=O)[O-])cc1 CHEMBL590010
-CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterification [1.7.3]
-[CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][cH:13][cH:14][cH:15]1.[CH2:3]([CH2:4][C:5](=[O:6])Cl)[CH2:2][Cl:1]>[Al+3].[Cl-].[Cl-].[Cl-].C(Cl)Cl>[CH3:9][CH:8]([CH3:10])[c:7]1[cH:11][cH:12][c:13]([cH:14][cH:15]1)[C:5](=[O:6])[CH2:4][CH2:3][CH2:2][Cl:1] |f:2.3.4.5| Friedel-Crafts acylation [3.10.1]
-ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2C[C@H](CCC2)O.O1CCOCC1.CC1(C2=C(C(=CC=C2)P(C3=CC=CC=C3)C4=CC=CC=C4)OC5=C(C=CC=C15)P(C6=CC=CC=C6)C7=CC=CC=C7)C.C=1C=CC(=CC1)\C=C\C(=O)\C=C\C2=CC=CC=C2.C=1C=CC(=CC1)\C=C\C(=O)\C=C\C2=CC=CC=C2.C=1C=CC(=CC1)\C=C\C(=O)\C=C\C2=CC=CC=C2.[Pd].[Pd].[Cs]OC(=O)O[Cs]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(OCC)=O)N6C[C@H](CCC6)O>CO.C1CCOC1.O.O[Li]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(O)=O)N6C[C@H](CCC6)O>CN(C)C(=[N+](C)C)ON1C2=C(C=CC=N2)N=N1.F[P-](F)(F)(F)(F)F.[NH4+].[Cl-].CN(C)C=O.CCN(C(C)C)C(C)C>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(N)=O)N6C[C@H](CCC6)O>>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N)N=CC3C(N)=O)N4C[C@H](CCC4)O |f:4.5.6.7.8,16.17,18.19|  US20190241576A1
-</textarea>
+
+  <textarea id="react_input" onkeyup="updateReact()" autofocus>CCO
+CCN</textarea>
+  <input id="react_smirks"
+         onkeyup="updateReact()"
+         type="text"
+         style="width: 100%; margin-top: 8px;"
+         value="[C:1]-[O:2]>>[C:1]-[N:2]"
+         placeholder="Enter reaction SMIRKS...">
+
   <div id="depict_main_opts">
     <i title="Clear input"
-       onclick="clearInput(); update();"
+       onclick="clearReactInput();"
        class="fas fa-trash-alt icon"></i>
-    <select name="style" onchange="update()">
+    <select name="style" onchange="updateReact()">
       <option value="cow">Color on White</option>
       <option value="cob">Color on Black</option>
       <option value="cot" selected>Color on Clear</option>
@@ -55,7 +49,7 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
       <option value="not">Neon on Clear</option>
       <option value="wcot">White Color on Clear</option>
     </select>
-    <select name="annotate" onchange="update()">
+    <select name="annotate" onchange="updateReact()">
       <option value="none" selected>No Annotation</option>
       <option value="number">Atom Numbers</option>
       <option value="mapidx">Atom Mapping</option>
@@ -64,32 +58,33 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
       <option value="atomvalue">Atom Value</option>
       <option value="cip">CIP Stereo Label</option>
     </select>
-    <select id="hdisp" name="hdisp" onchange="update()">
+    <select id="hdisp" name="hdisp" onchange="updateReact()">
       <option value="M">Minimal Hydrogens</option>
       <option value="P">Input Hydrogens</option>
       <option value="S" selected>Smart Hydrogens</option>
       <option value="C">Chiral Hydrogens</option>
       <option value="X">Explicit Hydrogens</option>
     </select>
-    <select name="abbr" onchange="update()">
+    <select name="abbr" onchange="updateReact()">
       <option value="on" selected>Abbreviate Reagents and Groups</option>
       <option value="reagents">Abbreviate Reagents</option>
       <option value="groups">Abbreviate Groups</option>
       <option value="off">Do Not Abbreviate</option>
     </select>
-    <input id="sma" onkeyup="update()" name="smarts"
+    <input id="sma" onkeyup="updateReact()" name="smarts"
            type="text" placeholder="Enter SMARTS pattern...">
     <i id="more-opts"
        title="More Options"
-       onclick="toggleExtraOpts();"
+       onclick="toggleReactExtraOpts();"
        class="fas fa-ellipsis-h icon"></i>
   </div>
+
   <div id="depict_extra_opts">
     <table class="grid" style="text-align: left;">
       <tr>
         <th title="Change the default reaction arrow type">Reaction</th>
         <td>
-          <select name="arw" onchange="update()">
+          <select name="arw" onchange="updateReact()">
             <option value="" selected>Plain</option>
             <option value="EQU">Equilibrium</option>
             <option value="NGO">No Go</option>
@@ -99,35 +94,42 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
         </td>
         <th title="Change if dative bonds are automatically perceived or not">Dative Bonds</th>
         <td>
-          <select name="dat" onchange="update()">
+          <select name="dat" onchange="updateReact()">
             <option value="y">Always</option>
             <option value="m" selected>Metal Only</option>
             <option value="n">Never</option>
           </select>
         </td>
-        <th title="Render the title inside the sketch rather than HTML">Embed Title</th>
+        <th title="Reverse reactants and products in the SMIRKS transform">Reverse Rule</th>
         <td>
-          <input type="checkbox" name="showtitle" onchange="update()">
+          <input type="checkbox" name="reverse" onchange="updateReact()">
         </td>
       </tr>
       <tr>
+        <th title="Render the title inside the sketch rather than HTML">Embed Title</th>
+        <td>
+          <input type="checkbox" name="showtitle" onchange="updateReact()">
+        </td>
         <th title="Change the overall size of the depictions">Zoom</th>
         <td>
-          <input onchange="update()" name="zoom" type="range" min="10" max="500"
+          <input onchange="updateReact()" name="zoom" type="range" min="10" max="500"
                  step="5" value="130">
         </td>
         <th>Rotate</th>
         <td>
-          <input onchange="update()" name="rotate" type="range" min="0" max="360"
+          <input onchange="updateReact()" name="rotate" type="range" min="0" max="360"
                  step="1" value="0">
         </td>
+      </tr>
+      <tr>
         <th>Flip</th>
         <td>
-          <input type="checkbox" name="flip" onchange="update()">
+          <input type="checkbox" name="flip" onchange="updateReact()">
         </td>
       </tr>
     </table>
   </div>
+
   <div id="result">
   </div>
   <div class="footer">
@@ -135,7 +137,7 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
   </div>
 </div>
 <script type="text/javascript">
-    window.onload = update();
+    window.onload = updateReact();
 </script>
 </body>
 </html>

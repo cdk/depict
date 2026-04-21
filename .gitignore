@@ -3,8 +3,9 @@
 .settings
 .classpath
 target
-
-
+.idea
+.DS_Store
+.vscode
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

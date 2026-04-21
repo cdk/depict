@@ -108,7 +108,6 @@ O=P(O)(O[K])O[K]	K2HPO4
 [O-]P([O-])(=O)O.[K+].[K+]	K2HPO4
 O=P(O[K])(O[K])O[K]	K3PO4
 [O-]P([O-])([O-])=O.[K+].[K+].[K+]	K3PO4
-N#C[Fe-4](C#N)(C#N)(C#N)(C#N)C#N.[K+].[K+].[K+].[K+]	K4Fe(CN)6
 Br[K]	KBr
 [Br-].[K+]	KBr
 N#C[K]	KCN
@@ -284,7 +283,6 @@ CCCC[N+](CCCC)(CCCC)CCCC.[F-]	TBAF
 CCCC[N+](CCCC)(CCCC)CCCC.[I-]	TBAI
 CN(C)C(On1nnc2ccccc21)=[N+](C)C.F[B-](F)(F)F	TBTU
 CC1(CCCC(N1[O])(C)C)C	TEMPO
-ClC(Cl)Cl	TCM
 O=C(O)C(F)(F)F	TFA
 O=C(OC(=O)C(F)(F)F)C(F)(F)F	TFAA
 C1CCOC1	THF
@@ -333,7 +331,6 @@ CC(C)(C)[O-].[K+]	tBuOK
 CC(C)(C)[PH+](C(C)(C)C)C(C)(C)C.F[B-](F)(F)F TTBP·HBF4
 C(#N)C=P(CCCC)(CCCC)CCCC	CMBP
 CCCP1(=O)OP(=O)(CCC)OP(=O)(CCC)O1	T3P
-[2H]C([2H])([2H])O[2H] CD3OD
 
 # Metabolites
 Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O ATP

@@ -16,9 +16,7 @@ function smittl(smiles) {
     i = j;
   if (i < 0)
     return ''; // no title
-  var prelim = smiles.substring(i+1);
-  // remove anything that looks like CXSMILES layers from the start
-  return prelim.replace(/^\|.+\|($|\s)/, "");
+  return smiles.substring(i+1);
 }
 
 function renderSMILES(inputs, opts) {
@@ -37,6 +35,7 @@ function renderSMILES(inputs, opts) {
       continue
 
     var title = smittl(input);
+    title = title.replace(/^\|[^|]+\|\s+/, "");
     if (!title)
       title = "#" + (1+i);
 
@@ -80,9 +79,7 @@ function update() {
               'showtitle': $("input[name='showtitle']").is(':checked'),
               'abbr':      $("select[name='abbr'] option:selected").val(),
               'arw':       $("select[name='arw'] option:selected").val(),
-              'dat':       $("select[name='dat'] option:selected").val(),
-              'dnt':       $("input[name='donuts']").is(':checked'),
-              'mc':        $("select[name='mc'] option:selected").val(),
+              'dat':       $("select[name='dat'] option:selected").val()
               };
 
   result.removeClass().addClass(opts.style);
@@ -124,10 +121,6 @@ function depict_url(opts, smiles, fmt, w, h) {
     	url += '&f=1';
   	if (opts.rotate)
     	url += '&r=' + encodeURIComponent(opts.rotate);
-    if (opts.dnt)
-        url += '&dnt=1';
-	if (opts.mc != 'p')
-		url += '&mc=' + encodeURIComponent(opts.mc);
 	return url;    
 }
 
@@ -164,7 +157,7 @@ function generate(opts, smiles, title) {
 }
 
 function handle_img_error(img) {
-  $.ajax($(img).attr('src')).fail(function(r){
+  $.ajax($(img).attr('src')).error(function(r){
     reason = r.responseText;
     var tempDom = $('<output>').append($.parseHTML(reason));
     console.log($('div', tempDom).html());

@@ -6,10 +6,6 @@ body {
   color: #222;
 }
 
-body#react {
-  background-color: #ad5368;
-}
-
 .center {
 	margin: auto;
 	max-width:  960px;
@@ -230,31 +226,44 @@ i.icon {
 	border: none;
 }
 
-textarea#input {
+textarea#input,
+textarea#react_input,
+textarea#map_input {
 	width:  100%;
 	min-height: 40px;
 	height: 125px;
 	resize: vertical;
 }
 
-#inputs {
-	display: grid;
-	grid-template-columns: auto max-content auto;
-	grid-gap: 5px;
-	align-items: center;
+.map-meta {
+  grid-area: bottom;
+  text-align: left;
+  margin-top: 6px;
 }
 
-#inputs input {
-	grid-column: span 3;
-	font-family: Menlo, Courier, Fixed-Width;
+.map-meta .title {
+  margin-bottom: 6px;
 }
 
-#inputs textarea {
-	min-height: 40px;
-    height: 125px;
-	resize: none;
+.map-output-label {
+  display: block;
+  font-size: smaller;
+  margin-bottom: 4px;
 }
 
+.map-output {
+  width: 100%;
+  min-height: 64px;
+  box-sizing: border-box;
+  font-family: Courier, "Fixed Width", monospace;
+  font-size: 9pt;
+}
+
+.map-loading {
+  padding: 24px 12px;
+  font-size: smaller;
+  color: #666;
+}
 
 #sma {
 	width:  249px;

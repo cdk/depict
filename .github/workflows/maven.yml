@@ -7,19 +7,23 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        # test against latest update of each major Java version:
-        java: [ 17, 21, 25 ]
-    name: Java ${{ matrix.java }}
+    runs-on: ubuntu-22.04
+    env:
+      # Pinned for reproducible builds (ReactionDecoder is not on Maven Central).
+      RDT_REF: 0d6632251108e7a8f625d15c60607a136093c4d8
+    name: Java 25
     steps:
       - uses: actions/checkout@v4
-      - name: Setup java
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          java-version: '25'
           cache: 'maven'
+      - name: Build and install ReactionDecoder (RDT) into local Maven repo
+        run: |
+          git clone https://github.com/asad/ReactionDecoder.git "${RUNNER_TEMP}/ReactionDecoder"
+          git -C "${RUNNER_TEMP}/ReactionDecoder" checkout --detach "${RDT_REF}"
+          mvn -B -f "${RUNNER_TEMP}/ReactionDecoder/pom.xml" clean install -DskipTests=true
       - name: Build with Maven
         run: mvn -B clean test javadoc:javadoc package

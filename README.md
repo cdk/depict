@@ -4,6 +4,25 @@ A web application for generating chemical structure depictions from SMILES.
 
 ## [https://www.simolecule.com/cdkdepict](http://www.simolecule.com/cdkdepict)
 
+## Atom and bond tagging
+
+The `/depict/{style}/{fmt}` endpoint now understands an optional `atomlists`
+query parameter that can be used to colour specific atoms and their connecting
+bonds. Provide the parameter as a semicolon (or pipe) separated list of atom
+index collections, for example:
+
+```
+atomlists=0,1,2;#ff8800:5,6
+```
+
+Each sublist receives its own highlight colour; when a colour is not provided,
+the server cycles through the default palette that is already used for atom-map
+visualisation. Any bond between atoms in the same sublist is highlighted using
+the same colour. The indices refer to the zero-based ordering of atoms in the
+depicted molecule. Colours can be supplied in hexadecimal form (for example
+`#ff8800` or `0xff8800`) or as comma-separated RGB(A) components such as
+`255,136,0`.
+
 ## Docker
 
 An image is available on DockerHub, [https://hub.docker.com/r/simolecule/cdkdepict/](https://hub.docker.com/r/simolecule/cdkdepict/). To launch a CDK Depict web serivce running on 8081:
@@ -17,7 +36,7 @@ $ docker run -p 8081:8080 simolecule/cdkdepict:latest
 You can download prebuilt release from GitHub, this is a runnable WAR and will
 launch a standalone server using Spring Boot:
  
- * [`cdkdepict.war`](https://github.com/cdk/depict/releases/download/1.14/cdkdepict.war)
+ * [`cdkdepict.war`](https://github.com/cdk/depict/releases/download/1.13/cdkdepict.war)
 
 #### Build
 
@@ -30,7 +49,7 @@ target directory. The WAR file can be deployed to an application server (e.g.
 TomCat, Jetty, GlassFish, JBOSS) whilst the JAR launches it's own embedded server.
 
 ```
-$ target/cdkdepict-webapp-1.14.war
+$ target/cdkdepict-1.10.war
 ```
 
 #### Standalone Bootable App

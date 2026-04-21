@@ -1,15 +1,16 @@
-FROM maven:3.9.3-eclipse-temurin-17-alpine as builder
+FROM maven:3.5-jdk-8-alpine as builder
 WORKDIR /usr/src/app
 COPY cdkdepict-lib cdkdepict-lib
 COPY cdkdepict-webapp cdkdepict-webapp
 COPY pom.xml pom.xml
-RUN mvn clean package -Pbootable
+RUN mvn clean package
 
-FROM eclipse-temurin:17-jre-alpine as runtime
+FROM eclipse-temurin:8u352-b08-jre-alpine as runtime
 
 # we need a font! DejaVu does fine but we only want the Sans-Serif one
 RUN apk add --no-cache libgcc && \
     rm /usr/share/fonts/dejavu/DejaVuSerif* \
+    /usr/share/fonts/dejavu/DejaVuLGC* \
     /usr/share/fonts/dejavu/DejaVuSansCond* \
     /usr/share/fonts/dejavu/DejaVuSansMono* \
     /usr/share/fonts/dejavu/DejaVuSans-* \
