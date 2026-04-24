@@ -136,6 +136,9 @@ public class MolOp {
         for (IBond bond : mol.bonds()) {
             IAtom beg = bond.getBegin();
             IAtom end = bond.getEnd();
+            if (bond.getDisplay().equals(IBond.Display.ArrowBeg) ||
+                bond.getDisplay().equals(IBond.Display.ArrowEnd))
+                continue;
             if (isPosDativeDonor(end, opt) && isNegDativeAcceptor(beg, opt)) {
                 bond.setDisplay(IBond.Display.ArrowBeg);
                 beg.setFormalCharge(beg.getFormalCharge() + 1);
@@ -149,6 +152,9 @@ public class MolOp {
         for (IBond bond : mol.bonds()) {
             IAtom beg = bond.getBegin();
             IAtom end = bond.getEnd();
+            if (bond.getDisplay().equals(IBond.Display.ArrowBeg) ||
+                bond.getDisplay().equals(IBond.Display.ArrowEnd))
+                continue;
             if (isDativeDonor(end, opt) && isDativeAcceptor(beg, opt)) {
                 bond.setDisplay(IBond.Display.ArrowBeg);
             } else if (isDativeDonor(beg, opt) && isDativeAcceptor(end, opt)) {
