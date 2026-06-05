@@ -112,7 +112,7 @@ function depict_url(opts, smiles, fmt, w, h) {
 		url += '&showtitle=' + opts.showtitle;
 	if (opts.sma)
 	  url += '&sma=' + encodeURIComponent(opts.sma);
-	if (opts.zoom && opts.zoom !== 130)
+	if (opts.zoom && Number(opts.zoom) !== 130)
       url += '&zoom=' + encodeURIComponent(opts.zoom/100);
     if (opts.annotate)
      url += '&annotate=' + encodeURIComponent(opts.annotate);
@@ -166,7 +166,7 @@ function generate(opts, smiles, title) {
 
 function handle_img_error(img) {
   $.ajax($(img).attr('src')).fail(function(r){
-    reason = r.responseText;
+    var reason = r.responseText;
     var tempDom = $('<output>').append($.parseHTML(reason));
     console.log($('div', tempDom).html());
     $(img).parent().parent().html($('<div class="error-mesg">').append($('div', tempDom).html()));
