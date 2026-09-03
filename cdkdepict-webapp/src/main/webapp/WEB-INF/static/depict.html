@@ -24,11 +24,11 @@
 [Li+].[Al+3].[H-].[H-].[H-].[H-] LiAlH4
 Cl[Pt@SP1](Cl)([NH3])[NH3] cis-platin
 O=[N+]([O-])[Co@]([NH3])([NH3])([NH3])([NH3])[N+]([O-])(=O) trans-[Co(NH3)4(NO2)2]
+[Fe@OH1-3]123(OC(=O)C(=O)O1)(OC(=O)C(=O)O2)OC(=O)C(=O)O3 Δ-[Fe(ox)3]3−
+[Fe@OH2-3]123(OC(=O)C(=O)O1)(OC(=O)C(=O)O2)OC(=O)C(=O)O3 Λ-[Fe(ox)3]3−
 Cl*.Cl*.c1ccccc1-c1ccccc1 |m:1:4.5.6.7.8.9,3:10.11.12.13.14.15| dichlorobiphenyl
 CCOCCOCCO |Sg:n:3,4,5::ht| PEGn
 *c1ccccc1 |$_AP1$| phenyl
-CC(C)[C@H](N*)C(*)=O |$;;;;;_AP1;;_AP2;$| valine monomer
-c1(:*:c2c(:*:c1*)C(N(N2)*)=O)* |$;Y;;;X;;R10;;;;Z;;R11$| US 2007/0129374 (I)
 C*.C*.C1=CC=CC=C1C=2C(C=CN3C2C=*C(=*3)C**)=O.C* |$;R2;;R3;;;;;;;;;;;;;;W;;A;;X;R4;;;R1$,m:0:5.4.9.8.7.6,2:7.6.5.4.9.8,24:4.9.8.7.6.5,Sg:n:20:m:ht| US 2007/0129372 (I)
 [Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].[Na+].CCCCc1ccc(CO[C@H]2O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]2O[C@H]3O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]4O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](O[C@H]5O[C@H](COS(=O)(=O)[O-])[C@@H](OS(=O)(=O)[O-])[C@H](OS(=O)(=O)[O-])[C@@H]5OS(=O)(=O)[O-])[C@@H]4OS(=O)(=O)[O-])[C@@H]3OS(=O)(=O)[O-])cc1 CHEMBL590010
 CCO.[CH3:1][C:2](=[O:3])[OH:4]>[H+]>CC[O:4][C:2](=[O:3])[CH3:1].O Ethyl esterification [1.7.3]
@@ -101,12 +101,13 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
         <th title="Change the multicenter display style">Multicenter</th>
         <td>
           <select name="mc" onchange="update()">
-            <option value="p" selected>Provided</option>
-            <option value="d">Dative</option>
-            <option value="an">Dash</option>
+            <option value="p">Provided</option>
+            <option value="c">Coordinate</option>
+            <option value="dn">Dash</option>
+            <option value="sn" selected>Solid (default)</option>
             <option value="hn">Hidden</option>
-            <option value="a">Dash (alt)</option>
-            <option value="h">Hidden (alt)</option>
+            <option value="d">Dash (alternating)</option>
+            <option value="h">Hidden (alternating)</option>
           </select>
         </td>
         <th title="Render the title inside the sketch rather than HTML">Embed Title</th>
@@ -137,6 +138,9 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
     </table>
   </div>
   <div id="result">
+  </div>
+  <div id="popup" style="display: none; position: fixed; text-align: left; font-size: 8pt; background: #ffcccc; padding: 2px; border-radius: 5px;">
+
   </div>
   <div class="footer">
     Built with the <a href="https://www.github.com/cdk/cdk">Chemistry Development Kit</a>. Depict v${depict.version}, CDK v${cdk.version}.

@@ -137,11 +137,38 @@ i.icon {
   grid-area: bottom;
 }
 
-.links {
-  opacity: 0;
+.overlay {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+.warning img {
+  display: none
+}
+
+.warning img {
+  display: none
+}
+
+.warning-mesg {
+  display: none;
+  vertical-align: top;
+  color: red;
+  font-size: 12pt;
+  text-align: left;
+  overflow: hidden;
+  max-width: 100%;
+  padding: 2px 20px 2px 2px;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+
+.warning .warning-mesg {
+  display: inline-block;
+}
+
+.links {
+  opacity: 0;
 }
 
 .links a {

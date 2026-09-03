@@ -24,6 +24,7 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.interfaces.IStereoElement;
+import org.openscience.cdk.io.IChemObjectReader;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.MDLV3000Reader;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
@@ -41,11 +42,7 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
-import org.openscience.cdk.stereo.Octahedral;
-import org.openscience.cdk.stereo.SquarePlanar;
 import org.openscience.cdk.stereo.Stereocenters;
-import org.openscience.cdk.stereo.TetrahedralChirality;
-import org.openscience.cdk.stereo.TrigonalBipyramidal;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.HydrogenState;
 import org.openscience.cdk.tools.manipulator.ReactionManipulator;
@@ -70,11 +67,8 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -156,6 +150,7 @@ public class DepictController {
     FLIP("f", false),
     WIDTH("w", -1),
     HEIGHT("h", -1),
+    RELAXED_SMILES("x", false),
     SVGUNITS("svgunits", "mm");
     private final String name;
     private final Object defaultValue;
@@ -304,6 +299,8 @@ public class DepictController {
                                           });
     }
 
+    boolean relaxedParsing = getBoolean(Param.RELAXED_SMILES, extra);
+
     boolean doAromaticity = false;
     if (getBoolean(Param.DONUTS, extra)) {
       doAromaticity = getString(Param.SMARTSQUERY, extra).isEmpty();
@@ -320,13 +317,16 @@ public class DepictController {
     StructureDiagramGenerator sdg = new StructureDiagramGenerator();
     sdg.setAlignMappedReaction(getBoolean(Param.ALIGNRXNMAP, extra));
     MolOp.DativeBond doDative = getParam(Param.DATIVE, extra, this::parseDativeParam);
+    MolOp.MulticenterStyle mcStyle = getParam(Param.MULTICENTER, extra, this::parseMulticenter);
 
     if (isRxn) {
       try {
         rxns = smipar.parseReactionSetSmiles(smi);
       } catch (CDKException ex) {
+        if (!relaxedParsing) throw ex;
         SmilesParser smipar2 = new SmilesParser(builder);
         smipar2.kekulise(false);
+        smipar2.setMode(IChemObjectReader.Mode.RELAXED);
         rxns = smipar2.parseReactionSetSmiles(smi);
       }
 
@@ -351,26 +351,17 @@ public class DepictController {
                                          getInt(Param.SMARTSHITLIM, extra));
         highlight.addAll(hits);
         abbreviate(rxn, abbr, highlight);
-        for (IAtomContainer component : rxn.getReactants().atomContainers()) {
+        for (IAtomContainer component : rxn) {
           setHydrogenDisplay(component, hDisplayType);
           MolOp.perceiveRadicals(component);
           MolOp.perceiveDativeBonds(component, doDative);
-        }
-        for (IAtomContainer component : rxn.getProducts().atomContainers()) {
-          setHydrogenDisplay(component, hDisplayType);
-          MolOp.perceiveRadicals(component);
-          MolOp.perceiveDativeBonds(component, doDative);
-        }
-        for (IAtomContainer component : rxn.getAgents().atomContainers()) {
-          setHydrogenDisplay(component, hDisplayType);
-          MolOp.perceiveRadicals(component);
-          MolOp.perceiveDativeBonds(component, doDative);
+          MolOp.setMulticenterStyle(mol, mcStyle);
         }
         if (!GeometryUtil.has2DCoordinates(rxn))
           sdg.generateCoordinates(rxn);
       }
     } else {
-      mol = loadMol(smi);
+      mol = loadMol(smi, relaxedParsing);
 
       if (doAromaticity) {
         Cycles.markRingAtomsAndBonds(mol);
@@ -385,6 +376,8 @@ public class DepictController {
       abbreviate(mol, abbr, annotate, highlight);
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol, doDative);
+      MolOp.setMulticenterStyle(mol, mcStyle);
+
       if (!GeometryUtil.has2DCoordinates(mol))
         sdg.generateCoordinates(mol);
     }
@@ -482,10 +475,6 @@ public class DepictController {
       }
     }
 
-    // and reaction?
-    MolOp.setMulticenterStyle(mol,
-                              getParam(Param.MULTICENTER, extra, this::parseMulticenter));
-
     final String fmtlc = fmt.toLowerCase(Locale.ROOT);
 
     // pre-render the depiction
@@ -529,12 +518,14 @@ public class DepictController {
         switch (s.toLowerCase(Locale.ROOT)) {
             case "p":
                 return MolOp.MulticenterStyle.Provided;
+            case "c":
+                return MolOp.MulticenterStyle.Coordinate;
             case "d":
-                return MolOp.MulticenterStyle.Dative;
-            case "a":
                 return MolOp.MulticenterStyle.Dashed;
-            case "an":
+            case "dn":
                 return MolOp.MulticenterStyle.DashedNeutral;
+            case "sn":
+                return MolOp.MulticenterStyle.SolidNeutral;
             case "h":
                 return MolOp.MulticenterStyle.Hidden;
             case "hn":
@@ -872,7 +863,7 @@ public class DepictController {
     return smi.split(" ")[0].contains(">");
   }
 
-  private IAtomContainer loadMol(String str) throws CDKException {
+  private IAtomContainer loadMol(String str, boolean relaxed) throws CDKException {
     if (str.contains("V2000")) {
       try (MDLV2000Reader mdlr = new MDLV2000Reader(new StringReader(str))) {
         return mdlr.read(SilentChemObjectBuilder.getInstance().newAtomContainer());
@@ -889,7 +880,9 @@ public class DepictController {
       try {
         return smipar.parseSmiles(str);
       } catch (CDKException ex) {
+        if (!relaxed) throw ex;
         SmilesParser smipar2 = new SmilesParser(builder);
+        smipar2.setMode(IChemObjectReader.Mode.RELAXED);
         smipar2.kekulise(false);
         return smipar2.parseSmiles(str);
       }
@@ -1054,12 +1047,21 @@ public class DepictController {
 
   @ExceptionHandler({Exception.class, InvalidSmilesException.class})
   public static ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
+    HttpHeaders responseHeaders = new HttpHeaders();
+    responseHeaders.add("Content-Type", "text/html;charset=utf-8");
     if (ex instanceof InvalidSmilesException) {
       InvalidSmilesException ise = (InvalidSmilesException) ex;
       String mesg = ise.getMessage();
       String disp = "";
       if (mesg.endsWith("^")) {
         int i = mesg.indexOf(":\n");
+
+        if (i < 0) {
+          i = mesg.lastIndexOf("\n");
+          if (i >= 0)
+            i = mesg.lastIndexOf("\n", i-1);
+        }
+
         if (i >= 0) {
           disp = mesg.substring(i + 2);
           mesg = mesg.substring(0, i);
@@ -1073,7 +1075,7 @@ public class DepictController {
                                           "<pre>" + disp + "</pre>" +
                                           "</div></body>" +
                                           "</html>",
-                                  new HttpHeaders(),
+                                  responseHeaders,
                                   HttpStatus.BAD_REQUEST);
     } else {
       LoggerFactory.getLogger(DepictController.class).error("Unexpected Error: ", ex);
@@ -1081,7 +1083,7 @@ public class DepictController {
                                           "<h1>" + ex.getClass().getSimpleName() + "</h1>" +
                                           ex.getMessage() +
                                           "</div></body></html>",
-                                  new HttpHeaders(),
+                                  responseHeaders,
                                   HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

@@ -15,7 +15,6 @@ import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupType;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +32,8 @@ public class MolOp {
 
     private static boolean isDativeDonor(IAtom a, DativeBond opt) {
         switch (a.getAtomicNumber()) {
+            case IAtom.C:
+                return a.getFormalCharge() == -1 && calcValence(a) == 4;
             case IAtom.N:
             case IAtom.P:
                 return a.getFormalCharge() == 0 && calcValence(a) == 4;
@@ -167,9 +168,10 @@ public class MolOp {
         Provided,
         Hidden,
         Dashed,
-        Dative,
+        Coordinate,
         HiddenNeutral,
-        DashedNeutral
+        DashedNeutral,
+        SolidNeutral
     }
 
     private static void setBondStyle(MulticenterStyle style, IBond bond) {
@@ -182,7 +184,7 @@ public class MolOp {
             case DashedNeutral:
                 bond.setDisplay(IBond.Display.Dash);
                 break;
-            case Dative:
+            case Coordinate:
                 if (bond.getBegin().getBondCount() == 1)
                     bond.setDisplay(IBond.Display.ArrowEnd);
                 else
@@ -232,15 +234,17 @@ public class MolOp {
                 IBond bond = bonds.iterator().next();
                 if (Elements.isMetal(bond.getBegin()) && atoms.contains(bond.getEnd())) {
                     setBondStyle(style, bond);
-                    if (style == MulticenterStyle.Dative ||
+                    if (style == MulticenterStyle.Coordinate ||
                         style == MulticenterStyle.DashedNeutral ||
-                        style == MulticenterStyle.HiddenNeutral)
+                        style == MulticenterStyle.HiddenNeutral ||
+                        style == MulticenterStyle.SolidNeutral)
                         neutralize(sgroup.getAtoms(), bond.getBegin(), bond.getEnd());
                 } else if (Elements.isMetal(bond.getEnd()) && atoms.contains(bond.getBegin())) {
                     setBondStyle(style, bond);
-                    if (style == MulticenterStyle.Dative ||
+                    if (style == MulticenterStyle.Coordinate ||
                         style == MulticenterStyle.DashedNeutral ||
-                        style == MulticenterStyle.HiddenNeutral)
+                        style == MulticenterStyle.HiddenNeutral ||
+                        style == MulticenterStyle.SolidNeutral)
                         neutralize(sgroup.getAtoms(), bond.getEnd(), bond.getBegin());
                 }
             }

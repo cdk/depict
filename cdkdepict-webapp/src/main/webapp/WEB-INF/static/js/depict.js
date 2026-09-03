@@ -1,5 +1,5 @@
 var ROOT_URL = "."
-//var ROOT_URL = "http://localhost:8080/cdkdepict/"
+// var ROOT_URL = "http://localhost:8080/cdkdepict/"
 
 function clearInput() {
   $('#input').val('');
@@ -157,19 +157,58 @@ function generate(opts, smiles, title) {
     $links.append('<a title="Download SVG" href="' + svg_url + '" download="' + title + '.svg"><i class="icon-file-svg icon" aria-hidden="true"></i></a><br>');
     $links.append('<a title="Download PNG" href="' + png_url + '" download="' + title + '.png"><i class="icon-file-png icon" aria-hidden="true"></i></a><br>');
     $links.append('<a title="Download PDF" href="' + pdf_url + '" download="' + title + '.pdf"><i class="icon-file-pdf icon" aria-hidden="true"></i></a>');
-    $img.append($links);
+
+    var $overlay = $('<div class="overlay">');
+    $overlay.append($links);
+    $img.append($overlay);
+    $img.append($('<div class="warning-mesg"></div>'))
     if (!opts.showtitle)
       $div.append($('<div class="title">').append(title));
     $outer.append($div);
     return $outer;
 }
 
+// this function parses the HTML Bad Request response so we
+// display it as a warning rather than a hard error
+function cleanup_warning(html_response) {
+	let tempDom = $('<output>').append($.parseHTML(html_response));
+	let warningMesg = $('div', tempDom).html();
+	// cleanup the warning mesg
+	warningMesg = warningMesg.replace('<h1>Invalid SMILES</h1>', '');
+	warningMesg = warningMesg.replaceAll("\n", "\\n").replace(/<pre>.+/g, '');
+	warningMesg = warningMesg.split(',').slice(1);
+	return 'Warning: ' + warningMesg;
+}
+
+function show_warning(context, mesg) {
+	$(context).parent().parent().addClass('warning');
+}
+
+function hide_warning(context) {
+	$(context).parent().parent().removeClass('warning');
+}
+
 function handle_img_error(img) {
-  $.ajax($(img).attr('src')).fail(function(r){
-    var reason = r.responseText;
-    var tempDom = $('<output>').append($.parseHTML(reason));
-    console.log($('div', tempDom).html());
-    $(img).parent().parent().html($('<div class="error-mesg">').append($('div', tempDom).html()));
-    $(img).parent().parent().addClass("error");
-  });
+  let img_url = $(img).attr('src');
+  if (!img_url.includes("&x=1")) {
+  	  $(img).attr('src', img_url + "&x=1");
+  	  var header = new Headers();
+      header.append('Content-Type','text/plain; charset=UTF-8');
+	  fetch(img_url, { method: 'GET', headers: header }).then(r => r.text())
+					.then(html_response => {
+						$(img).parent().parent().children('.warning-mesg')
+						      .html(cleanup_warning(html_response));
+						$(img).parent().parent()
+						      .children('.overlay')
+						      .prepend('<i style="color: red" onmouseenter="show_warning(this)" onmouseleave="hide_warning(this)" class="fa-solid fa-triangle-exclamation"></i>');
+					});
+ } else {
+    // this is a hard error - we could not depict it even with x=1 (relaxed mode)
+ 	fetch(img_url).then(r => r.text())
+    					.then(payload => {
+    						var tempDom = $('<output>').append($.parseHTML(payload));
+    						$(img).parent().parent().html($('<div class="error-mesg">').append($('div', tempDom).html()));
+    						$(img).parent().parent().addClass("error");
+    					});
+ }
 }
