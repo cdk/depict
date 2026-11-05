@@ -65,9 +65,11 @@ ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2
       <option value="X">Explicit Hydrogens</option>
     </select>
     <select name="abbr" onchange="update()">
-      <option value="on" selected>Abbreviate Reagents and Groups</option>
-      <option value="reagents">Abbreviate Reagents</option>
-      <option value="groups">Abbreviate Groups</option>
+      <option value="grs" selected>Abbreviate All</option>
+      <option value="s">Abbreviate Solvents</option>
+      <option value="r">Abbreviate Reagents</option>
+      <option value="g">Abbreviate Groups</option>
+      <option value="gr">Abbreviate Groups + Reagents</option>
       <option value="off">Do Not Abbreviate</option>
     </select>
     <input id="sma" onkeyup="update()" name="smarts"

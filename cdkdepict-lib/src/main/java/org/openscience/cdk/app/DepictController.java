@@ -124,6 +124,7 @@ public class DepictController {
 
   private final Abbreviations groupAbbr = new Abbreviations();
   private final Abbreviations agentAbbr = new Abbreviations();
+  private final Abbreviations solventAbbr = new Abbreviations();
 
   private enum Param {
     // match highlighting
@@ -162,6 +163,9 @@ public class DepictController {
   }
 
   public DepictController() throws IOException {
+    this.solventAbbr.loadFromFile("/org/openscience/cdk/app/common_solvents.smi");
+    this.solventAbbr.without(Abbreviations.Option.AUTO_CONTRACT_HETERO);
+    this.solventAbbr.with(Abbreviations.Option.ALLOW_SINGLETON);
     this.agentAbbr.loadFromFile("/org/openscience/cdk/app/reagent_abbr.smi");
     this.agentAbbr.loadFromFile("/org/openscience/cdk/app/group_abbr.smi");
     this.agentAbbr.with(Abbreviations.Option.ALLOW_SINGLETON);
@@ -793,39 +797,72 @@ public class DepictController {
         atomSet.put((IAtom) obj, 1);
     }
 
+    boolean fungrps  = false;
+    boolean reagents = false;
+    boolean solvents = false;
+
     switch (mode.toLowerCase()) {
       case "true":
       case "on":
       case "yes":
+      case "grs":
+      case "groups+reagents+solvents":
+        fungrps = reagents = solvents = true;
+        break;
+      case "gr":
       case "groups+agents":
-        for (IAtomContainer mol : rxn.getReactants().atomContainers()) {
-          groupAbbr.apply(mol, atomSet);
-          contractHydrates(mol);
-        }
-        for (IAtomContainer mol : rxn.getProducts().atomContainers()) {
-          Set<IAtom> atoms = new HashSet<>();
-          List<Sgroup> newSgroups = new ArrayList<>();
-          groupAbbr.apply(mol, atomSet);
-          contractHydrates(mol);
-        }
-        for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          agentAbbr.apply(mol, atomSet);
-          contractHydrates(mol);
-        }
+        fungrps = reagents = true;
         break;
+      case "g":
       case "groups":
-        for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          groupAbbr.apply(mol, atomSet);
-          contractHydrates(mol);
-        }
+        fungrps = true;
         break;
+      case "r":
       case "reagents":
       case "agents":
-        for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
-          agentAbbr.apply(mol, atomSet);
-          contractHydrates(mol);
-        }
+        reagents = true;
         break;
+      case "s":
+      case "solvents":
+        solvents = true;
+        break;
+    }
+
+    if (solvents) {
+      // TODO need new option i.e. MeCH2OH not OK
+      for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
+        List<Sgroup> abbrs = solventAbbr.generate(mol, atomSet);
+        if (abbrs.size() == 1 && abbrs.get(0).getAtoms().size() == mol.getAtomCount()) {
+          mol.setProperty(CDKConstants.PLACE_BELOW_ARROW, true);
+          List<Sgroup> sgroups = mol.getProperty(CDKConstants.CTAB_SGROUPS);
+          if (sgroups == null)
+            sgroups = new ArrayList<>();
+          else
+            sgroups = new ArrayList<>(sgroups);
+          sgroups.addAll(abbrs);
+          mol.setProperty(CDKConstants.CTAB_SGROUPS, sgroups);
+        }
+      }
+    }
+
+    if (reagents) {
+      for (IAtomContainer mol : rxn.getAgents().atomContainers()) {
+        if (Boolean.TRUE.equals(mol.getProperty(CDKConstants.PLACE_BELOW_ARROW)))
+          continue;
+        agentAbbr.apply(mol, atomSet);
+        contractHydrates(mol);
+      }
+    }
+
+    if (fungrps) {
+      for (IAtomContainer mol : rxn.getReactants().atomContainers()) {
+        groupAbbr.apply(mol, atomSet);
+        contractHydrates(mol);
+      }
+      for (IAtomContainer mol : rxn.getProducts().atomContainers()) {
+        groupAbbr.apply(mol, atomSet);
+        contractHydrates(mol);
+      }
     }
   }
 
@@ -1086,12 +1123,5 @@ public class DepictController {
                                   responseHeaders,
                                   HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  }
-
-  public static void main(String[] args) throws IOException, CDKException {
-    new DepictController().depict("ClC1=NC=2N(C(=C1)N(CC3=CC=CC=C3)CC4=CC=CC=C4)N=CC2C(OCC)=O>C1(=CC(=CC(=N1)C)N)N2C[C@H](CCC2)O.O1CCOCC1.CC1(C2=C(C(=CC=C2)P(C3=CC=CC=C3)C4=CC=CC=C4)OC5=C(C=CC=C15)P(C6=CC=CC=C6)C7=CC=CC=C7)C.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.C=1C=CC(=CC1)\\C=C\\C(=O)\\C=C\\C2=CC=CC=C2.[Pd].[Pd].[Cs]OC(=O)O[Cs]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(OCC)=O)N6C[C@H](CCC6)O>CO.C1CCOC1.O.O[Li]>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(O)=O)N6C[C@H](CCC6)O>CN(C)C(=[N+](C)C)ON1C2=C(C=CC=N2)N=N1.F[P-](F)(F)(F)(F)F.[NH4+].[Cl-].CN(C)C=O.CCN(C(C)C)C(C)C>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N(CC4=CC=CC=C4)CC5=CC=CC=C5)N=CC3C(N)=O)N6C[C@H](CCC6)O>>C1(=CC(=CC(=N1)C)NC2=NC=3N(C(=C2)N)N=CC3C(N)=O)N4C[C@H](CCC4)O |f:4.5.6.7.8,16.17,18.19|  US20190241576A1",
-                                  "svg",
-                                  "bot",
-                                  new HashMap<>());
   }
 }
