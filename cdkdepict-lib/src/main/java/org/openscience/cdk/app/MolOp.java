@@ -11,7 +11,7 @@ import org.openscience.cdk.config.Elements;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
+import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.sgroup.SgroupType;
 
@@ -178,7 +178,7 @@ public class MolOp {
         switch (style) {
             case Hidden:
             case HiddenNeutral:
-                bond.setProperty(StandardGenerator.HIDDEN, true);
+                bond.set(IChemObject.HIDDEN);
                 break;
             case Dashed:
             case DashedNeutral:
