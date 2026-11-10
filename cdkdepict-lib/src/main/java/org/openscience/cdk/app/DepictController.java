@@ -42,6 +42,8 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.stereo.ExtendedTetrahedral;
+import org.openscience.cdk.stereo.Projection;
+import org.openscience.cdk.stereo.StereoElementFactory;
 import org.openscience.cdk.stereo.Stereocenters;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.HydrogenState;
@@ -337,6 +339,10 @@ public class DepictController {
       for (IReaction rxn : rxns.reactions()) {
         if (rxn.getDirection() == IReaction.Direction.FORWARD)
           rxn.setDirection(getParam(Param.ARROW, extra, this::parseArrowParam));
+        if (!GeometryUtil.has2DCoordinates(rxn))
+          sdg.generateCoordinates(rxn);
+        else
+          synchroniseWedges(rxn, relaxedParsing);
       }
 
       highlight = new HashSet<>();
@@ -361,11 +367,13 @@ public class DepictController {
           MolOp.perceiveDativeBonds(component, doDative);
           MolOp.setMulticenterStyle(mol, mcStyle);
         }
-        if (!GeometryUtil.has2DCoordinates(rxn))
-          sdg.generateCoordinates(rxn);
       }
     } else {
       mol = loadMol(smi, relaxedParsing);
+      if (!GeometryUtil.has2DCoordinates(mol))
+        sdg.generateCoordinates(mol);
+      else
+        synchroniseWedges(mol, relaxedParsing);
 
       if (doAromaticity) {
         Cycles.markRingAtomsAndBonds(mol);
@@ -381,9 +389,6 @@ public class DepictController {
       MolOp.perceiveRadicals(mol);
       MolOp.perceiveDativeBonds(mol, doDative);
       MolOp.setMulticenterStyle(mol, mcStyle);
-
-      if (!GeometryUtil.has2DCoordinates(mol))
-        sdg.generateCoordinates(mol);
     }
 
     // Add annotations
@@ -415,7 +420,7 @@ public class DepictController {
                                               StandardGenerator.HighlightStyle.OuterGlowFillRings);
         } else {
           myGenerator = myGenerator.withOuterGlowHighlight();
-          myGenerator = myGenerator.withParam(StandardGenerator.Visibility.class,
+          myGenerator = myGenerator.withParam(Visibility.class,
                                               SymbolVisibility.iupacRecommendationsWithoutTerminalCarbon());
           for (IAtom atom : mol.atoms()) {
             Integer mapidx = atom.getProperty(CDKConstants.ATOM_ATOM_MAPPING);
@@ -499,6 +504,45 @@ public class DepictController {
     }
 
     throw new IllegalArgumentException("Unsupported format.");
+  }
+
+
+  private void synchroniseWedges(IAtomContainer mol, boolean relaxed) throws CDKException {
+    Map<IChemObject,IStereoElement<?,?>> provided = new HashMap<>();
+    for (IStereoElement<?,?> se : mol.stereoElements()) {
+      provided.put(se.getFocus(), se);
+    }
+
+    List<IStereoElement> displayed = StereoElementFactory.using2DCoordinates(mol)
+                                                         .interpretProjections(Projection.Haworth)
+                                                         .interpretProjections(Projection.Chair)
+                                                         .createAll();
+    // coordinates were provided by no wedges
+    if (displayed.isEmpty() && !provided.isEmpty()) {
+      new StructureDiagramGenerator().generateWedges(mol);
+    } else if (provided.isEmpty() && displayed.isEmpty()) {
+      mol.setStereoElements(displayed);
+      new StructureDiagramGenerator().generateWedges(mol);
+    } else if (!relaxed) {
+      // if strict we verify the depiction is correct
+      Set<IChemObject> visited = new HashSet<>();
+      for (IStereoElement<?,?> se : displayed) {
+        IStereoElement<?,?> before = provided.get(se.getFocus());
+        if (before == null || before.getConfig() != se.getConfig())
+          throw new CDKException("Mismatch in stereochemistry from coordinates and SMILES");
+        visited.add(se.getFocus());
+      }
+      if (visited.size() < displayed.size())
+        throw new CDKException("Mismatch in stereochemistry from coordinates and SMILES");
+    } else {
+      mol.setStereoElements(displayed);
+      new StructureDiagramGenerator().generateWedges(mol);
+    }
+  }
+
+  private void synchroniseWedges(IReaction rxn, boolean relaxed) throws CDKException {
+    for (IAtomContainer mol : rxn)
+      synchroniseWedges(mol, relaxed);
   }
 
   private MolOp.DativeBond parseDativeParam(String s) {
@@ -890,6 +934,9 @@ public class DepictController {
       case "on":
       case "yes":
       case "groups":
+      case "g":
+      case "gr":
+      case "grs":
         contractHydrates(mol);
         groupAbbr.apply(mol, atomSet);
         break;

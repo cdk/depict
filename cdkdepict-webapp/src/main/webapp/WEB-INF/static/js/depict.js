@@ -174,9 +174,10 @@ function cleanup_warning(html_response) {
 	let tempDom = $('<output>').append($.parseHTML(html_response));
 	let warningMesg = $('div', tempDom).html();
 	// cleanup the warning mesg
-	warningMesg = warningMesg.replace('<h1>Invalid SMILES</h1>', '');
+	warningMesg = warningMesg.replace('<h1>Invalid SMILES</h1>', '')
+							 .replace('<h1>CDKException</h1>', '')
+							 .replace(/^could not parse '[^']+',/, '');
 	warningMesg = warningMesg.replaceAll("\n", "\\n").replace(/<pre>.+/g, '');
-	warningMesg = warningMesg.split(',').slice(1);
 	return 'Warning: ' + warningMesg;
 }
 
@@ -196,6 +197,7 @@ function handle_img_error(img) {
       header.append('Content-Type','text/plain; charset=UTF-8');
 	  fetch(img_url, { method: 'GET', headers: header }).then(r => r.text())
 					.then(html_response => {
+						$(img).parent().attr('href', img_url + "&x=1");
 						$(img).parent().parent().children('.warning-mesg')
 						      .html(cleanup_warning(html_response));
 						$(img).parent().parent()
