@@ -16,12 +16,12 @@
     <url>http://github.com/cdk/cdkdepict</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cdk.version>2.14-SNAPSHOT</cdk.version>
+        <cdk.version>2.14.1</cdk.version>
         <depict.version>${project.parent.version}</depict.version>
         <junit.version>5.14.3</junit.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <spring-webmvc.version>6.2.19</spring-webmvc.version>
-        <spring-boot.version>3.5.14</spring-boot.version>
+        <spring-webmvc.version>7.0.10</spring-webmvc.version>
+        <spring-boot.version>4.1.2</spring-boot.version>
     </properties>
     <developers>
         <developer>
@@ -153,6 +153,11 @@
                 <groupId>org.openscience.cdk</groupId>
                 <artifactId>cdk-ctab</artifactId>
                 <version>${cdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.23.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
